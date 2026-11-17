@@ -1,6 +1,6 @@
 <!doctype html>
-<!-- green-ooze v19 -->
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Green Ooze"><meta name="theme-color" content="#0b1408"><meta name="application-name" content="Green Ooze"><title>Green Ooze</title><link rel="manifest" href="manifest.json?v=19"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<!-- green-ooze v20 -->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Green Ooze"><meta name="theme-color" content="#0b1408"><meta name="application-name" content="Green Ooze"><title>Green Ooze</title><link rel="manifest" href="manifest.json?v=20"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <style>:root{--sa-t:env(safe-area-inset-top,0px);--sa-r:env(safe-area-inset-right,0px);--sa-b:env(safe-area-inset-bottom,0px);--sa-l:env(safe-area-inset-left,0px)}html,body{margin:0;background:#000;overflow:hidden;height:100%;height:100dvh;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:none}canvas{display:block;position:fixed;left:0;top:0;margin:0;cursor:crosshair;touch-action:none;-webkit-user-select:none}</style>
 </head><body><canvas id="c"></canvas>
 <script>
@@ -4791,7 +4791,7 @@ function joyLayout(){
   );
   return {L:{x:130,y:H-130,r:stickR},R:{x:W-130,y:H-130,r:stickR},btns};
 }
-const GAME_VERSION='v19';
+const GAME_VERSION='v20';
 let _ignoreMouseUntil=0;
 function suppressGhostMouse(){_ignoreMouseUntil=performance.now()+700;}
 function inMenuState(){
@@ -6799,7 +6799,7 @@ function drawHUD(){
 let last=performance.now(),acc=0;
 function frame(now){const raw=Math.min(0.1,(now-last)/1000);last=now;if(typeof tickTimeScale==='function')tickTimeScale(raw);const sc=typeof gameScale==='function'?gameScale():(state&&state.slow>0?0.3:1);acc+=raw*sc;let n=0;while(acc>=DT&&n<4){update(DT);acc-=DT;n++;}if(n===4)acc=0;render();requestAnimationFrame(frame);}
 resetGame(true);
-window.__game={get GAME_VERSION(){return typeof GAME_VERSION!=='undefined'?GAME_VERSION:'v19'},cssToCanvas,get state(){return state},get player(){return player},get truck(){return truck},get enemies(){return enemies},get ragdolls(){return ragdolls},get particles(){return particles},
+window.__game={get GAME_VERSION(){return typeof GAME_VERSION!=='undefined'?GAME_VERSION:'v20'},cssToCanvas,get state(){return state},get player(){return player},get truck(){return truck},get enemies(){return enemies},get ragdolls(){return ragdolls},get particles(){return particles},
   keys,mouse,update,render,pose,makeBomber,bomberBoom,get boss(){return state.boss},startBoss,destroyTech,damageTech,ARENA,launchDrone,SFX,setStance,enterTruck,exitTruck,explode,hitChar,onKey,get cam(){return cam},isSolid,groundY,get crates(){return crates},get walls(){return walls},bloodCov,
   startMode,isWilmer,isTed,get squad(){return squad},get eVehs(){return eVehs},get smokes(){return smokes},launchSmoke,fireRWS,completeMission,makePatria,resetGame,get GAME_MODE(){return GAME_MODE},drawWeaponLineupSheet,drawGunLocal,drawGunIcon,gunVisual,get drops(){return drops},get ammoCrates(){return ammoCrates},makeSniper,makeShield,makeGrenadier,tryPickup,applyLoadout,confirmLoadout,openLoadout,openWilmerSplash,openMeridianSplash,openModeSplash,drawModeSplash,triggerSlowmo,gameScale,noteKill,shouldSkipLoadout,get btEnabled(){return btEnabled},set btEnabled(v){btEnabled=!!v},laserClip,shieldBlock,
   startMission,openMissionSelect,openScoreScreen,computeScore,resetProgress,loadProgress,get CURRENT_MISSION(){return CURRENT_MISSION},set CURRENT_MISSION(v){CURRENT_MISSION=v},get lastScore(){return lastScore},get nvgOn(){return nvgOn},set nvgOn(v){nvgOn=!!v},get QUALITY(){return QUALITY},set QUALITY(v){QUALITY=v},get INPUT_MODE(){return INPUT_MODE},set INPUT_MODE(v){INPUT_MODE=v},get civilians(){return civilians},get rangeTargets(){return rangeTargets},get eDrones(){return eDrones},get convoy(){return convoy},throwFlare,togglePause,rumble,get lastPad(){return lastPad},MDEFS,get tedUnit(){return tedUnit},unitReveal,unitCrawl,unitPressKill,drawTedArt,get tedArtReady(){return typeof tedArtReady!=='undefined'&&tedArtReady},get vhsOn(){return vhsOn},set vhsOn(v){vhsOn=!!v},get tedPress(){return tedPress},get tedTanker(){return tedTanker},get tedPolice(){return tedPolice},get fxDebris(){return fxDebris},get envProps(){return envProps},addChunk,debrisBurst,wakeChunks,chunksMaxSpeed,gatherLights,get lightN(){return lightN},initFxWorld,isNight,duskAmt,addLight,scareBirds};
@@ -8031,6 +8031,332 @@ if(window.__game){
     G.joyLayout=joyLayout;
     G.p19WeaponBar=function(){const L=joyLayout();return L.bar||null;};
     G.p19BoomHold=function(){return _p19BoomHold;};
+  }
+})();
+/* ---------------- v20: Tedminator opening layouts, street spawns, intro reveal ---------------- */
+(function(){
+  'use strict';
+
+  let tedIntro=null;
+
+  function streetY(x){
+    if(typeof hmY==='function')return hmY(x);
+    return (typeof groundY==='function')?groundY(x):0;
+  }
+  function spawnIsClear(x){
+    if(x<16||x>LW-16)return false;
+    const y=streetY(x);
+    if(isSolid(x,y-6)||isSolid(x,y-24)||isSolid(x,y-48)||isSolid(x,y-72))return false;
+    if(!(isSolid(x,y)||isSolid(x,y+8)||isSolid(x,y+16)))return false;
+    return true;
+  }
+  function spawnClearX(x, prefer, maxScan){
+    maxScan=maxScan==null?280:maxScan;
+    prefer=prefer||1;
+    if(spawnIsClear(x))return x;
+    for(let i=4;i<=maxScan;i+=4){
+      const a=x+prefer*i,b=x-prefer*i;
+      if(spawnIsClear(a))return a;
+      if(spawnIsClear(b))return b;
+    }
+    return x;
+  }
+  function placeOnStreet(c,x,prefer){
+    if(!c)return c;
+    x=spawnClearX(x,prefer||1,320);
+    c.x=x;c.y=streetY(x);c.vy=0;c.onGround=true;
+    return c;
+  }
+  function onRoof(c){
+    if(!c)return false;
+    return c.y<streetY(c.x)-40;
+  }
+  function dropToStreet(c){
+    if(!c)return;
+    const y=streetY(c.x);
+    if(c.y<y-36 && !isSolid(c.x,y-8) && !isSolid(c.x,y-48)){
+      c.y=y;c.vy=0;c.onGround=true;
+    }else if(!spawnIsClear(c.x) && (isSolid(c.x,c.y-8)||isSolid(c.x,c.y-40))){
+      placeOnStreet(c,c.x,1);
+    }
+  }
+  function groundReachable(x0,x1){
+    const a=Math.min(x0,x1),b=Math.max(x0,x1);
+    for(let x=a;x<=b;x+=4){if(!spawnIsClear(x))return false;}
+    return true;
+  }
+  function addTedBuilding(x,w,h,doorX,doorW){
+    doorW=doorW==null?64:doorW;
+    const by=hmY(x+w/2);
+    if(doorX==null)doorX=x; // west facade door by default
+    addWall(x,by-h,22,h);
+    addWall(x+w-22,by-h,22,h);
+    addWall(x,by-h-14,w,16);
+    fillRect(doorX,by-112,doorW,112,0);
+    const x0=Math.floor(x/CS),x1=Math.ceil((x+w)/CS);
+    for(let cx=x0;cx<x1;cx++)updateCol(cx);
+    renderMask(x0-1,Math.floor((by-h-20)/CS),x1+1,Math.ceil(by/CS)+2);
+    return {x:x,w:w,h:h,by:by,doorX:doorX,doorW:doorW,doorMid:doorX+doorW/2};
+  }
+  function snapCamTo(px){
+    const x=px!=null?px:(player&&player.x)||0;
+    cam.x=clamp(x-W*0.32,0,LW-W);
+    cam.y=clamp(streetY(x)-H*0.62,-200,LH-H);
+  }
+
+  /* ---- redesigned Ted terrain: open approaches, doors in west facades, later blocks intact ---- */
+  function genTedTerrainV20(){
+    const id=CURRENT_MISSION;
+    for(let i=0;i<NT;i++){const x=i*TS;let h=830-10*Math.sin(x/700)-4*Math.sin(x/180);TH[i]=h;}
+    flatten(0,LW);
+    crates=[];walls=[];tedNeon=[];
+    finishTerrain();
+    if(id==='ted1'){
+      // open street 0–1000, then the NITE club with a west doorway UNIT can walk out of
+      const club=addTedBuilding(1080,460,210,1080,70);
+      tedNeon.push({x:club.x+80,y:club.by-club.h+28,txt:'NITE',col:'#ff4ad8'});
+      tedNeon.push({x:club.x+200,y:club.by-club.h+56,txt:'CLUB',col:'#00e8ff'});
+      tedNeon.push({x:club.x+320,y:club.by-club.h+36,txt:'OPEN',col:'#ffd060'});
+      // later street blocks — first wall well past the opening
+      for(const x of [1780,2380,3000,3700,4500,5300,6100,6800]){
+        const by=hmY(x),h=140+((x/80)|0)%80;
+        addWall(x,by-h,28,h);addWall(x+220,by-(h-20),28,h-20);
+        tedNeon.push({x:x+40,y:by-h+30,txt:['BAR','COIN','NITE','EATS','OPEN'][(x/300|0)%5],col:x%2?'#ff4ad8':'#00e8ff'});
+      }
+      for(const x of [2000,2800,3600,4900,5800]){const by=hmY(x);addCrate(x,by-32,28);}
+    }else if(id==='ted2'){
+      const px=2400,by=hmY(px);
+      addWall(px,by-180,24,180);addWall(px+720,by-180,24,180);addWall(px,by-188,744,24);
+      // real front door in the west facade + interior lobby gap
+      fillRect(px,by-112,24,112,0);
+      fillRect(px+320,by-112,80,112,0);
+      addWall(px+80,by-90,200,16);addWall(px+440,by-90,200,16);
+      // no approach walls west of the station; later street walls stay east
+      for(const x of [3600,4300,5200,6200]){const y=hmY(x);addWall(x,y-100,22,100);}
+      const x0=Math.floor((px-4)/CS),x1=Math.ceil((px+744)/CS);
+      for(let cx=x0;cx<x1;cx++)updateCol(cx);
+      renderMask(x0-1,Math.floor((by-200)/CS),x1+1,Math.ceil(by/CS)+2);
+    }else{
+      // open yard, first bay with a west door for the reveal; later sheds leave a tanker gap
+      addTedBuilding(1120,420,160,1120,74);
+      for(const x of [1880,2680,3480,4480,5280]){
+        const by=hmY(x);
+        addWall(x,by-130,30,130);addWall(x+260,by-130,30,130);addWall(x,by-140,290,16);
+      }
+      addWall(6000,hmY(6000)-160,22,160);addWall(7000,hmY(7000)-160,22,160);
+    }
+    for(let cx=0;cx<MW;cx++)updateCol(cx);renderMask(0,0,MW-1,MH-1);
+  }
+  genTedTerrain=genTedTerrainV20;
+
+  function beginTedIntro(spec){
+    tedIntro={
+      on:true,t:0,dur:spec.dur==null?3.2:spec.dur,
+      revealed:false,fade:0,
+      cap:spec.cap||'',cap2:spec.cap2||'',
+      unitTo:spec.unitTo
+    };
+    if(tedUnit){
+      tedUnit.hold=true;
+      if(spec.unitFrom!=null)placeOnStreet(tedUnit,spec.unitFrom,spec.unitPrefer||1);
+      if(spec.unitTo!=null)tedUnit.introTo=spec.unitTo;
+      tedUnit.facing=spec.facing!=null?spec.facing:-1;
+      tedUnit.alert=0;
+    }
+  }
+  function revealTedIntro(){
+    if(!tedIntro||tedIntro.revealed)return;
+    tedIntro.revealed=true;tedIntro.t=tedIntro.dur;
+    if(tedUnit){
+      tedUnit.hold=false;
+      tedUnit.alert=8;
+      if(tedIntro.unitTo!=null)placeOnStreet(tedUnit,tedIntro.unitTo,-1);
+      tedUnit.introTo=null;
+    }
+    if(CURRENT_MISSION==='ted2'&&tedUnit){
+      // burst out the front — still on the street, then existing smash juice
+      const px=2400;
+      tedUnit.rammed=true;
+      placeOnStreet(tedUnit,px-40,-1);
+      tedUnit.vx=-320;tedUnit.facing=-1;
+      for(const w of walls){if(w.alive&&w.x>2360&&w.x<2560){if(typeof collapseWall==='function')collapseWall(w);}}
+      explode(px+40,streetY(px)-40,54,40,'enemy',false);
+      tedUnit.hudT=1;state.shake=10;
+      if(typeof showMsg==='function')showMsg('DEN KOMMER GENOM FRONTEN  ·  THROUGH THE FRONT');
+    }else if(typeof showMsg==='function'&&tedIntro.cap2){
+      showMsg(tedIntro.cap2);
+    }
+  }
+  function tickTedIntro(dt){
+    if(!tedIntro||!tedIntro.on)return;
+    tedIntro.t+=dt;
+    if(!tedIntro.revealed&&tedIntro.t>=tedIntro.dur)revealTedIntro();
+    if(tedIntro.revealed)tedIntro.fade=Math.min(1,(tedIntro.fade||0)+dt);
+    if(tedUnit)dropToStreet(tedUnit);
+    if(player)dropToStreet(player);
+    if(typeof tedPolice!=='undefined')for(const s of tedPolice)dropToStreet(s);
+  }
+
+  if(typeof updateUnit==='function'){
+    const _p20uu=updateUnit;
+    updateUnit=function(e,dt){
+      if(e&&e.alive)dropToStreet(e);
+      const holding=!!(e&&(e.hold||(tedIntro&&tedIntro.on&&!tedIntro.revealed)));
+      if(holding){
+        if(e.downT>0){e.downT-=dt;e.vx=approach(e.vx,0,400*dt);physChar(e,dt);return;}
+        if(e.introTo!=null){
+          const d=e.introTo-e.x;
+          if(Math.abs(d)>10){e.facing=Math.sign(d);e.vx=approach(e.vx,Math.sign(d)*130,900*dt);}
+          else{e.vx=approach(e.vx,0,900*dt);e.x=e.introTo;e.facing=-1;}
+        }else{e.vx=approach(e.vx,0,900*dt);}
+        physChar(e,dt);
+        dropToStreet(e);
+        return;
+      }
+      return _p20uu(e,dt);
+    };
+  }
+
+  if(typeof initTed==='function'){
+    const _p20init=initTed;
+    initTed=function(){
+      _p20init();
+      if(!isTed())return;
+      tedIntro=null;
+      const id=CURRENT_MISSION;
+      placeOnStreet(player,id==='ted2'?1980:380,1);
+      player.facing=1;player.aim=0;
+      if(typeof applyDefaultRightAim==='function')applyDefaultRightAim();
+      if(id==='ted1'){
+        if(truck){truck.x=5200;if(typeof resetTruckWheels==='function'){} }
+        // unit waits just inside the club, then walks out the west door into the street
+        if(!tedUnit)makeUnit(1300);
+        beginTedIntro({
+          dur:3.2,
+          cap:'Natt på Neon  ·  Night on Neon Street',
+          cap2:'UNIT-101 kliver ut  ·  UNIT-101 steps out',
+          unitFrom:1480, unitTo:1000, facing:-1
+        });
+        state.objX=5200;
+        state.msg='';state.msgT=0;
+      }else if(id==='ted2'){
+        if(truck)truck.x=5600;
+        // officers on the street at the entrance, not on the roof or in the desks
+        tedPolice.length=0;if(typeof squad!=='undefined')squad.length=0;
+        for(const x of [2140,2210,2270,2330,2380]){
+          const s=makeOfficer(x);placeOnStreet(s,x,1);s.facing=-1;
+        }
+        if(!tedUnit)makeUnit(2860);
+        beginTedIntro({
+          dur:3.4,
+          cap:'Precincten  ·  Hold the entrance',
+          cap2:'UNIT-101 kommer genom fronten  ·  UNIT-101 comes through the front',
+          unitFrom:2860, unitTo:2480, facing:-1
+        });
+        tedUnit.ramT=99;
+        state.objX=5600;
+        state.msg='';state.msgT=0;
+      }else{
+        if(truck){truck.x=240;try{truck.y=streetY(240);}catch(e){}}
+        const tx=4000,ty=streetY(tx)-40;
+        if(tedTanker){tedTanker.x=tx;tedTanker.y=ty;}
+        if(!tedUnit)makeUnit(1380);
+        beginTedIntro({
+          dur:3.2,
+          cap:'Fabrikshallen  ·  The factory floor',
+          cap2:'UNIT-101 visar sig  ·  UNIT-101 steps out',
+          unitFrom:1380, unitTo:1060, facing:-1
+        });
+        if(tedPress){tedPress.x=6550;tedPress.y=streetY(6550);}
+        state.objX=6550;
+        state.msg='';state.msgT=0;
+      }
+      snapCamTo(player.x);
+    };
+  }
+
+  if(typeof tickTed==='function'){
+    const _p20tick=tickTed;
+    tickTed=function(dt){
+      tickTedIntro(dt);
+      const _ram=tedUnit&&tedUnit.ramT;
+      _p20tick(dt);
+      // prevent the old ram from snapping the unit onto a roof or to a blocked x
+      if(CURRENT_MISSION==='ted2'&&tedUnit&&tedUnit.rammed)dropToStreet(tedUnit);
+      if(tedUnit)dropToStreet(tedUnit);
+    };
+  }
+
+  function drawTedIntro(){
+    if(!isTed()||!tedIntro||!tedIntro.on)return;
+    const cap=tedIntro.revealed?(tedIntro.cap2||tedIntro.cap):tedIntro.cap;
+    if(!cap)return;
+    let a=1;
+    if(!tedIntro.revealed)a=Math.min(1,tedIntro.t/0.35);
+    else a=1-Math.max(0,(tedIntro.fade-2.2)/0.8);
+    if(a<=0.02)return;
+    const y=H-92;
+    ctx.save();
+    ctx.globalAlpha=Math.min(1,a)*0.72;
+    ctx.fillStyle='#000';ctx.fillRect(W/2-420,y-28,840,52);
+    ctx.globalAlpha=1;
+    if(typeof fillTextCrisp==='function'){
+      const prev=ctx.globalAlpha;ctx.globalAlpha=a;
+      fillTextCrisp(cap,W/2,y,{
+        align:'center', baseline:'middle',
+        size:22, weight:'900', family:'Impact, "Arial Black", sans-serif',
+        fill:'#f0e8d8', sw:3, alpha:a
+      });
+      ctx.globalAlpha=prev;
+    }else{
+      ctx.globalAlpha=a;ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.font='900 22px Impact, "Arial Black", sans-serif';
+      ctx.strokeStyle='rgba(0,0,0,0.9)';ctx.lineWidth=4;ctx.strokeText(cap,W/2,y);
+      ctx.fillStyle='#f0e8d8';ctx.fillText(cap,W/2,y);
+      ctx.textAlign='left';ctx.textBaseline='alphabetic';
+    }
+    ctx.restore();
+  }
+
+  const _p20post=typeof pass10PostRender==='function'?pass10PostRender:function(){};
+  pass10PostRender=function(){
+    _p20post();
+    drawTedIntro();
+  };
+
+  if(typeof tedHUDExtras==='function'){
+    const _p20hud=tedHUDExtras;
+    tedHUDExtras=function(){
+      if(tedIntro&&tedIntro.on&&!tedIntro.revealed)return;
+      return _p20hud.apply(this,arguments);
+    };
+  }
+  if(typeof drawUnitHUD==='function'){
+    const _p20uh=drawUnitHUD;
+    drawUnitHUD=function(){
+      if(tedIntro&&tedIntro.on&&!tedIntro.revealed)return;
+      return _p20uh.apply(this,arguments);
+    };
+  }
+  if(typeof confirmLoadout==='function'){
+    const _p20conf=confirmLoadout;
+    confirmLoadout=function(){
+      const r=_p20conf.apply(this,arguments);
+      if(isTed()){state.brief=0;state.msg='';state.msgT=0;}
+      return r;
+    };
+  }
+
+  if(window.__game){
+    const G=window.__game;
+    G.streetY=streetY;
+    G.spawnIsClear=spawnIsClear;
+    G.groundReachable=groundReachable;
+    G.onRoof=onRoof;
+    G.placeOnStreet=placeOnStreet;
+    G.tedIntro=function(){return tedIntro;};
+    G.revealTedIntro=revealTedIntro;
+    G.snapCamTo=snapCamTo;
   }
 })();
 </script></body></html>
