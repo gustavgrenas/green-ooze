@@ -1,6 +1,6 @@
 <!doctype html>
-<!-- green-ooze v15 -->
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Green Ooze"><meta name="theme-color" content="#0b1408"><meta name="application-name" content="Green Ooze"><title>Green Ooze</title><link rel="manifest" href="manifest.json?v=15"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<!-- green-ooze v16 -->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Green Ooze"><meta name="theme-color" content="#0b1408"><meta name="application-name" content="Green Ooze"><title>Green Ooze</title><link rel="manifest" href="manifest.json?v=16"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <style>:root{--sa-t:env(safe-area-inset-top,0px);--sa-r:env(safe-area-inset-right,0px);--sa-b:env(safe-area-inset-bottom,0px);--sa-l:env(safe-area-inset-left,0px)}html,body{margin:0;background:#000;overflow:hidden;height:100%;height:100dvh;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:none}canvas{display:block;position:fixed;left:0;top:0;margin:0;cursor:crosshair;touch-action:none;-webkit-user-select:none}</style>
 </head><body><canvas id="c"></canvas>
 <script>
@@ -4382,7 +4382,29 @@ drawModeSplash=function(){
 let INPUT_MODE='keyboard', lastPad=null, padAimX=0, padAimY=0, adsZoom=1, QUALITY='high';
 let TOUCH=false, touches={}, leftStick={id:null,x:0,y:0,cx:0,cy:0,active:false}, rightStick={id:null,x:0,y:0,cx:0,cy:0,active:false};
 let UI_MODE='desktop', TUT_ON=false, TUT_T=0;
-const UI_PREF_KEY='greenooze_ui_mode', TUT_KEY='greenooze_tut_v15';
+const UI_PREF_KEY='greenooze_ui_mode', TUT_KEY='greenooze_tut_v15', LIGHT_KEY='greenooze_light';
+let LIGHT_LEVEL='bright', _touchFiring=false;
+function loadLightLevel(){
+  try{const s=localStorage.getItem(LIGHT_KEY);if(s==='normal'||s==='bright'||s==='extra')return s;}catch(e){}
+  return (typeof isMobileUI==='function'&&isMobileUI())||detectMobileDevice()?'bright':'normal';
+}
+function setLightLevel(lv,save){
+  LIGHT_LEVEL=(lv==='extra'||lv==='normal'||lv==='bright')?lv:'bright';
+  if(save){try{localStorage.setItem(LIGHT_KEY,LIGHT_LEVEL);}catch(e){}}
+}
+function cycleLightLevel(){
+  setLightLevel(LIGHT_LEVEL==='normal'?'bright':LIGHT_LEVEL==='bright'?'extra':'normal',true);
+}
+function lightBoost(){
+  // 0..1 — even 'normal' gets a little lift; Ljus/Extra are for iPhone
+  return LIGHT_LEVEL==='extra'?0.92:LIGHT_LEVEL==='bright'?0.58:0.16;
+}
+function lightLabel(wil){
+  if(LIGHT_LEVEL==='extra')return wil?'Ljusstyrka: Extra ljus':'Brightness: Extra';
+  if(LIGHT_LEVEL==='bright')return wil?'Ljusstyrka: Ljus':'Brightness: Bright';
+  return wil?'Ljusstyrka: Normal':'Brightness: Normal';
+}
+
 function detectMobileDevice(){
   try{
     const ua=navigator.userAgent||'';
@@ -4564,17 +4586,23 @@ function applyVirtualInput(){
     if(rightStick.active){
       const mag=Math.hypot(rightStick.x,rightStick.y);
       const dist=140+mag*260;
-      if(mag>0.18){
+      if(mag>0.16){
         const ax=player.x+rightStick.x*dist,ay=player.y-40+rightStick.y*dist;
         let ang=Math.atan2(ay-(player.y-40),ax-player.x);
         ang=aimAssist(ang,player.x,player.y-40);
         mouse.x=clamp(player.x+Math.cos(ang)*dist-cam.x,8,W-8);
         mouse.y=clamp(player.y-40+Math.sin(ang)*dist-cam.y,8,H-8);
       }else if(mob)applyDefaultRightAim();
-      if(mag>0.62)mouse.down=true;else if(mob&&mag<0.45)mouse.down=false;
+      // hysteresis so a slightly-centered hold doesn't drop fire
+      if(mag>0.50||(_touchFiring&&mag>0.28)){mouse.down=true;_touchFiring=true;}
+      else if(mag<0.28){mouse.down=false;_touchFiring=false;}
     }else if(mob){
       applyDefaultRightAim();
-      mouse.down=false;
+      mouse.down=false;_touchFiring=false;
+    }
+    // auto-reload when the magazine is empty (don't depend on a fire attempt or R)
+    if(mob&&player.ammo&&WEAPONS[player.weapon]&&!WEAPONS[player.weapon].grenade&&!WEAPONS[player.weapon].drone){
+      if((player.ammo[player.weapon]||0)<=0&&!(player.reload>0)&&typeof startReload==='function')startReload(player);
     }
   }
 
@@ -4640,6 +4668,7 @@ function pauseItems(){
     {lab:(wil?'Slow-mo: ':'Slow-mo: ')+(typeof btEnabled!=='undefined'&&btEnabled?(wil?'PÅ':'ON'):(wil?'AV':'OFF')),fn:()=>{if(typeof btEnabled!=='undefined')btEnabled=!btEnabled;}},
     {lab:(wil?'Ljud: ':'Sound: ')+(SFX&&SFX.muted?(wil?'AV':'OFF'):(wil?'PÅ':'ON')),fn:()=>{if(SFX)SFX.toggle();}},
     {lab:(wil?'Kvalitet: ':'Quality: ')+(QUALITY==='low'?(wil?'LÅG':'LOW'):(wil?'HÖG':'HIGH')),fn:()=>{setQuality(QUALITY==='low'?'high':'low');}},
+    {lab:lightLabel(wil),fn:()=>cycleLightLevel()},
     {lab:wil?'Styrning':'Controls',fn:()=>{state.paused=false;showTutorial();}}
   ];
 }
@@ -4708,7 +4737,7 @@ function joyLayout(){
       {id:'duck',x:W-300,y:H-310,r:btnR,lab:'DUCKA',icon:'↓',big:true},
       {id:'grenade',x:W-300,y:H-200,r:btnR*0.92,lab:'GRANAT',big:true},
       {id:'weapon',x:W-430,y:H-130,r:btnR*0.8,lab:'VAPEN'},
-      {id:'reload',x:W-430,y:H-220,r:btnR*0.8,lab:'LADDA'},
+      {id:'reload',x:W-445,y:H-230,r:btnR*1.05,lab:'LADDA',big:true},
       {id:'use',x:80,y:H-280,r:btnR,lab:'E',sub:'PLOCKA',big:true},
       {id:'pick',x:210,y:H-280,r:btnR*0.8,lab:'F'},
       {id:'smoke',x:210,y:H-200,r:btnR*0.8,lab:'RÖK'},
@@ -4716,7 +4745,7 @@ function joyLayout(){
     ]
   };
 }
-const GAME_VERSION='v15';
+const GAME_VERSION='v16';
 let _ignoreMouseUntil=0;
 function suppressGhostMouse(){_ignoreMouseUntil=performance.now()+700;}
 function inMenuState(){
@@ -4767,6 +4796,43 @@ function tapButton(id){
   else if(id==='pause')togglePause();
 }
 
+function resetTouchInput(){
+  touches={};
+  leftStick={id:null,x:0,y:0,cx:0,cy:0,active:false};
+  rightStick={id:null,x:0,y:0,cx:0,cy:0,active:false};
+  _touchFiring=false;
+  if(mouse)mouse.down=false;
+}
+function touchPt(t){
+  const p=cssToCanvas(t.clientX,t.clientY);
+  return {x:clamp(p.x,0,W),y:clamp(p.y,0,H),id:t.identifier};
+}
+function syncTouchList(e){
+  // Rebuild from the live touch list; fall back to previous + changedTouches when
+  // e.touches is empty/incomplete (iOS / CDP sometimes omit remaining fingers on touchend).
+  const raw=e.touches, type=e.type||'';
+  const live={};
+  if(raw&&raw.length){
+    for(let i=0;i<raw.length;i++){const p=touchPt(raw[i]);live[p.id]=p;}
+  }
+  const changed=e.changedTouches||[];
+  if(type==='touchend'||type==='touchcancel'||type==='pointerup'||type==='pointercancel'){
+    if(!(raw&&raw.length)){
+      for(const id in touches)live[id]=touches[id];
+    }
+    for(const t of changed)delete live[t.identifier];
+  }else{
+    for(const t of changed){const p=touchPt(t);live[p.id]=p;}
+    if(!(raw&&raw.length)){
+      for(const id in touches)if(!live[id])live[id]=touches[id];
+    }
+  }
+  if(leftStick.active&&!live[leftStick.id]){leftStick.active=false;leftStick.id=null;leftStick.x=0;leftStick.y=0;}
+  if(rightStick.active&&!live[rightStick.id]){rightStick.active=false;rightStick.id=null;rightStick.x=0;rightStick.y=0;_touchFiring=false;if(!inMenuState()&&!_touchFiring)mouse.down=false;}
+  touches=live;
+  if(leftStick.active&&live[leftStick.id]){const L=joyLayout().L,p=live[leftStick.id];leftStick.x=clamp((p.x-L.x)/L.r,-1,1);leftStick.y=clamp((p.y-L.y)/L.r,-1,1);}
+  if(rightStick.active&&live[rightStick.id]){const R=joyLayout().R,p=live[rightStick.id];rightStick.x=clamp((p.x-R.x)/R.r,-1,1);rightStick.y=clamp((p.y-R.y)/R.r,-1,1);}
+}
 function bindTouch(){
   if(window._touchBound)return;window._touchBound=true;
   const onStart=e=>{
@@ -4774,49 +4840,60 @@ function bindTouch(){
     if(e.cancelable)e.preventDefault();
     suppressGhostMouse();
     try{if(typeof SFX!=='undefined'&&SFX.resume)SFX.resume();}catch(ex){}
+    if(inMenuState()){
+      const t=e.changedTouches&&e.changedTouches[0];
+      if(t){const p=touchPt(t);mouse.x=p.x;mouse.y=p.y;mouse.clicked=true;}
+      syncTouchList(e);
+      return;
+    }
     for(const t of e.changedTouches){
-      const p=cssToCanvas(t.clientX,t.clientY);
-      const x=clamp(p.x,0,W),y=clamp(p.y,0,H);
-      if(inMenuState()){mouse.x=x;mouse.y=y;mouse.clicked=true;continue;}
-      if(!isMobileUI()){mouse.x=x;mouse.y=y;}
-      const h=hitBtn(x,y);
-      touches[t.identifier]={x:x,y:y,h};
+      const p=touchPt(t),h=hitBtn(p.x,p.y);
+      if(!isMobileUI()){mouse.x=p.x;mouse.y=p.y;}
+      // If this id was stale-assigned to a stick but the finger is now on a button, reassign
+      if(leftStick.id===t.identifier&&!(h&&h.id==='Ljoy')){leftStick.active=false;leftStick.id=null;leftStick.x=0;leftStick.y=0;}
+      if(rightStick.id===t.identifier&&!(h&&h.id==='Rjoy')){rightStick.active=false;rightStick.id=null;rightStick.x=0;rightStick.y=0;}
       if(h&&h.id==='Ljoy'){leftStick={id:t.identifier,x:0,y:0,cx:joyLayout().L.x,cy:joyLayout().L.y,active:true};}
       else if(h&&h.id==='Rjoy'){rightStick={id:t.identifier,x:0,y:0,cx:joyLayout().R.x,cy:joyLayout().R.y,active:true};}
       else if(h)tapButton(h.id);
     }
+    syncTouchList(e);
   };
   const onMove=e=>{
     if(e.cancelable)e.preventDefault();
-    for(const t of e.changedTouches){
-      const p=cssToCanvas(t.clientX,t.clientY);
-      const x=clamp(p.x,0,W),y=clamp(p.y,0,H);
-      if(leftStick.id===t.identifier){const L=joyLayout().L;leftStick.x=clamp((x-L.x)/L.r,-1,1);leftStick.y=clamp((y-L.y)/L.r,-1,1);}
-      if(rightStick.id===t.identifier){const R=joyLayout().R;rightStick.x=clamp((x-R.x)/R.r,-1,1);rightStick.y=clamp((y-R.y)/R.r,-1,1);}
-      if(!isMobileUI()||rightStick.id===t.identifier){mouse.x=x;mouse.y=y;}
+    if(inMenuState()){
+      const t=e.changedTouches&&e.changedTouches[0];
+      if(t){const p=touchPt(t);mouse.x=p.x;mouse.y=p.y;}
+      syncTouchList(e);
+      return;
     }
+    syncTouchList(e);
   };
   const onEnd=e=>{
     suppressGhostMouse();
-    for(const t of e.changedTouches){
-      if(leftStick.id===t.identifier){leftStick.active=false;leftStick.id=null;leftStick.x=0;leftStick.y=0;}
-      if(rightStick.id===t.identifier){rightStick.active=false;rightStick.id=null;rightStick.x=0;rightStick.y=0;mouse.down=false;}
-      delete touches[t.identifier];
-    }
+    syncTouchList(e);
   };
   const opts={passive:false,capture:true};
   addEventListener('touchstart',onStart,opts);
   addEventListener('touchmove',onMove,opts);
   addEventListener('touchend',onEnd,opts);
   addEventListener('touchcancel',onEnd,opts);
-  const sink=e=>{if(performance.now()<_ignoreMouseUntil){e.preventDefault();e.stopImmediatePropagation();}};
+  const sink=e=>{
+    const hold=performance.now()<_ignoreMouseUntil||(TOUCH&&(leftStick.active||rightStick.active||_touchFiring));
+    if(hold){e.preventDefault();e.stopImmediatePropagation();}
+  };
   addEventListener('mousedown',sink,true);
   addEventListener('mouseup',sink,true);
   addEventListener('click',sink,true);
+  const onVis=()=>{if(document.hidden)resetTouchInput();};
+  addEventListener('visibilitychange',onVis);
+  addEventListener('blur',resetTouchInput);
+  addEventListener('pagehide',resetTouchInput);
+  addEventListener('pageshow',()=>{resetTouchInput();if(typeof fit==='function')fit();});
 }
 bindTouch();
 if(detectTouch()){TOUCH=true;autoQuality();}
 UI_MODE=loadUIMode();
+LIGHT_LEVEL=loadLightLevel();
 
 function drawInputOverlays(){
   // gamepad reticle
@@ -4855,10 +4932,13 @@ function drawInputOverlays(){
       ctx.fillStyle=b.big?'rgba(0,0,0,0.42)':'rgba(0,0,0,0.36)';ctx.fill();
       ctx.strokeStyle=b.id==='jump'||b.id==='duck'?'rgba(184,155,106,0.85)':'rgba(230,220,200,0.45)';
       ctx.lineWidth=b.big?2.5:1.6;ctx.stroke();
-      ctx.fillStyle='rgba(230,220,200,0.92)';
+      const empty=player&&WEAPONS[player.weapon]&&!WEAPONS[player.weapon].grenade&&((player.ammo[player.weapon]||0)<=0||player.reload>0);
+      const pulse=b.id==='reload'&&empty;
+      if(pulse){ctx.strokeStyle='rgba(230,200,80,'+(0.55+0.45*Math.sin(state.time*8))+')';ctx.lineWidth=3.5;ctx.stroke();}
+      ctx.fillStyle=pulse?'rgba(255,230,140,0.95)':'rgba(230,220,200,0.92)';
       if(b.icon){ctx.font='900 22px Impact, "Arial Black", sans-serif';ctx.fillText(b.icon,b.x,b.y-6);}
       ctx.font=(b.big?'bold 13px':'bold 11px')+' monospace';
-      ctx.fillText(b.lab,b.x,b.y+(b.icon?16:4));
+      ctx.fillText((pulse&&player.reload>0)?'LADDAR':b.lab,b.x,b.y+(b.icon?16:4));
       if(b.sub){ctx.font='bold 9px monospace';ctx.fillStyle='rgba(230,220,200,0.7)';ctx.fillText(b.sub,b.x,b.y+r-10);}
     }
     ctx.textAlign='left';
@@ -6555,9 +6635,11 @@ function render(){
   ctx.restore();
   drawForeground(camX,camY);
   if(typeof drawSnow==='function')drawSnow();
-  ctx.fillStyle=(typeof isWilmer==='function'&&isWilmer())?'rgba(30,50,70,0.10)':'rgba(40,25,20,0.12)';ctx.fillRect(0,0,W,H);
-  ctx.save();ctx.globalAlpha=0.07;ctx.translate(-((Math.random()*256)|0),-((Math.random()*256)|0));ctx.fillStyle=grainPat;ctx.fillRect(0,0,W+256,H+256);ctx.restore();
-  ctx.drawImage(vign,0,0);
+  const lb=typeof lightBoost==='function'?lightBoost():0;
+  const fogA=(typeof isWilmer==='function'&&isWilmer()?0.10:0.12)*(1-lb*0.85);
+  ctx.fillStyle=(typeof isWilmer==='function'&&isWilmer())?'rgba(30,50,70,'+fogA+')':'rgba(40,25,20,'+fogA+')';ctx.fillRect(0,0,W,H);
+  ctx.save();ctx.globalAlpha=0.07*(1-lb*0.6);ctx.translate(-((Math.random()*256)|0),-((Math.random()*256)|0));ctx.fillStyle=grainPat;ctx.fillRect(0,0,W+256,H+256);ctx.restore();
+  ctx.save();ctx.globalAlpha=Math.max(0.12,1-lb*0.85);ctx.drawImage(vign,0,0);ctx.restore();
   if(state.hurtFlash>0){ctx.fillStyle='rgba(120,0,0,'+state.hurtFlash*0.5+')';ctx.fillRect(0,0,W,H);}
   if(state.hitT>0){const k=state.hitT/0.14,r0=6+(1-k)*3,r1=13+(1-k)*3;ctx.strokeStyle=state.hitKill?'rgba(220,30,30,'+k+')':'rgba(240,235,225,'+k+')';ctx.lineWidth=state.hitKill?3:2;ctx.beginPath();
     for(const [sx2,sy2] of [[1,1],[1,-1],[-1,1],[-1,-1]]){ctx.moveTo(mouse.x+sx2*r0,mouse.y+sy2*r0);ctx.lineTo(mouse.x+sx2*r1,mouse.y+sy2*r1);}ctx.stroke();}
@@ -6638,7 +6720,7 @@ function drawHUD(){
 let last=performance.now(),acc=0;
 function frame(now){const raw=Math.min(0.1,(now-last)/1000);last=now;if(typeof tickTimeScale==='function')tickTimeScale(raw);const sc=typeof gameScale==='function'?gameScale():(state&&state.slow>0?0.3:1);acc+=raw*sc;let n=0;while(acc>=DT&&n<4){update(DT);acc-=DT;n++;}if(n===4)acc=0;render();requestAnimationFrame(frame);}
 resetGame(true);
-window.__game={get GAME_VERSION(){return typeof GAME_VERSION!=='undefined'?GAME_VERSION:'v15'},cssToCanvas,get state(){return state},get player(){return player},get truck(){return truck},get enemies(){return enemies},get ragdolls(){return ragdolls},get particles(){return particles},
+window.__game={get GAME_VERSION(){return typeof GAME_VERSION!=='undefined'?GAME_VERSION:'v16'},cssToCanvas,get state(){return state},get player(){return player},get truck(){return truck},get enemies(){return enemies},get ragdolls(){return ragdolls},get particles(){return particles},
   keys,mouse,update,render,pose,makeBomber,bomberBoom,get boss(){return state.boss},startBoss,destroyTech,damageTech,ARENA,launchDrone,SFX,setStance,enterTruck,exitTruck,explode,hitChar,onKey,get cam(){return cam},isSolid,groundY,get crates(){return crates},get walls(){return walls},bloodCov,
   startMode,isWilmer,isTed,get squad(){return squad},get eVehs(){return eVehs},get smokes(){return smokes},launchSmoke,fireRWS,completeMission,makePatria,resetGame,get GAME_MODE(){return GAME_MODE},drawWeaponLineupSheet,drawGunLocal,drawGunIcon,gunVisual,get drops(){return drops},get ammoCrates(){return ammoCrates},makeSniper,makeShield,makeGrenadier,tryPickup,applyLoadout,confirmLoadout,openLoadout,openWilmerSplash,openMeridianSplash,openModeSplash,drawModeSplash,triggerSlowmo,gameScale,noteKill,shouldSkipLoadout,get btEnabled(){return btEnabled},set btEnabled(v){btEnabled=!!v},laserClip,shieldBlock,
   startMission,openMissionSelect,openScoreScreen,computeScore,resetProgress,loadProgress,get CURRENT_MISSION(){return CURRENT_MISSION},set CURRENT_MISSION(v){CURRENT_MISSION=v},get lastScore(){return lastScore},get nvgOn(){return nvgOn},set nvgOn(v){nvgOn=!!v},get QUALITY(){return QUALITY},set QUALITY(v){QUALITY=v},get INPUT_MODE(){return INPUT_MODE},set INPUT_MODE(v){INPUT_MODE=v},get civilians(){return civilians},get rangeTargets(){return rangeTargets},get eDrones(){return eDrones},get convoy(){return convoy},throwFlare,togglePause,rumble,get lastPad(){return lastPad},MDEFS,get tedUnit(){return tedUnit},unitReveal,unitCrawl,unitPressKill,drawTedArt,get tedArtReady(){return typeof tedArtReady!=='undefined'&&tedArtReady},get vhsOn(){return vhsOn},set vhsOn(v){vhsOn=!!v},get tedPress(){return tedPress},get tedTanker(){return tedTanker},get tedPolice(){return tedPolice},get fxDebris(){return fxDebris},get envProps(){return envProps},addChunk,debrisBurst,wakeChunks,chunksMaxSpeed,gatherLights,get lightN(){return lightN},initFxWorld,isNight,duskAmt,addLight,scareBirds};
@@ -6663,5 +6745,95 @@ if(window.__game){
   G.maybeShowTutorial=maybeShowTutorial;
   G.applyDefaultRightAim=applyDefaultRightAim;
   G.joyLayout=joyLayout;
+}
+/* ---------------- pass 16: touch-fire reliability + brightness ---------------- */
+if(typeof duskAmt==='function'){
+  const _p16dusk=duskAmt;
+  duskAmt=function(){
+    const d=_p16dusk();
+    const b=typeof lightBoost==='function'?lightBoost():0;
+    return Math.max(0.04,d*(1-b*0.5));
+  };
+}
+if(typeof drawLighting==='function'){
+  const _p16lit=drawLighting;
+  drawLighting=function(){
+    _p16lit();
+    const b=typeof lightBoost==='function'?lightBoost():0;
+    if(!(b>0)||!state||state.title>0.8)return;
+    ctx.save();
+    // lift shadows after the night multiply so iPhone LCDs stay readable
+    ctx.globalCompositeOperation='screen';
+    ctx.fillStyle='rgba(255,236,210,'+(0.06+b*0.14)+')';
+    ctx.fillRect(0,0,W,H);
+    ctx.globalCompositeOperation='overlay';
+    ctx.fillStyle='rgba(255,248,230,'+(0.05+b*0.10)+')';
+    ctx.fillRect(0,0,W,H);
+    ctx.restore();
+  };
+}
+function drawCharRim(c){
+  if(!c||!c.alive||c.inTruck)return;
+  const b=typeof lightBoost==='function'?lightBoost():0;
+  if(b<0.2)return;
+  const P=typeof pose==='function'?pose(c):(c._pose||null);
+  if(!P||!P.head||!P.pelvis)return;
+  const friend=!!(c.isPlayer||c.friendly);
+  ctx.save();
+  ctx.globalCompositeOperation='lighter';
+  ctx.strokeStyle=friend?'rgba(255,232,190,'+(0.28+b*0.28)+')':'rgba(255,92,70,'+(0.32+b*0.32)+')';
+  ctx.lineWidth=2.4+b*1.4;ctx.lineJoin='round';ctx.lineCap='round';
+  ctx.beginPath();
+  const pts=[P.head,P.neck,P.chest,P.belly,P.pelvis].filter(Boolean);
+  if(P.lFoot)pts.push(P.lKnee,P.lFoot);
+  if(P.rFoot)pts.push(P.rKnee,P.rFoot);
+  for(let i=0;i<pts.length;i++){
+    if(i===0)ctx.moveTo(pts[i][0],pts[i][1]);else ctx.lineTo(pts[i][0],pts[i][1]);
+  }
+  ctx.stroke();
+  // soft halo behind torso so silhouettes lift off dark walls
+  const hx=P.chest?P.chest[0]:c.x,hy=P.chest?P.chest[1]:c.y-40;
+  const g=ctx.createRadialGradient(hx,hy,2,hx,hy,friend?34:30);
+  g.addColorStop(0,friend?'rgba(255,220,160,'+(0.10+b*0.10)+')':'rgba(255,70,50,'+(0.10+b*0.12)+')');
+  g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(hx,hy,friend?34:30,0,7);ctx.fill();
+  ctx.restore();
+}
+if(typeof drawChar==='function'){
+  const _p16char=drawChar;
+  drawChar=function(c){
+    if(c&&c.alive&&!c.inTruck)drawCharRim(c);
+    _p16char(c);
+  };
+}
+
+if(window.__game){
+  const G=window.__game;
+  Object.defineProperty(G,'LIGHT_LEVEL',{get:()=>LIGHT_LEVEL,set:v=>setLightLevel(v,true)});
+  G.setLightLevel=setLightLevel;
+  G.lightBoost=lightBoost;
+  G.resetTouchInput=resetTouchInput;
+  G.syncTouchList=syncTouchList;
+}
+
+// keep HUD ammo scream-obvious while empty / reloading
+if(typeof drawHUD==='function'){
+  const _p16hud=drawHUD;
+  drawHUD=function(){
+    _p16hud();
+    if(!state||!player||state.title>0.8||state.splash||state.loadout||state.missionSelect||state.scoreScreen)return;
+    const w=WEAPONS[player.weapon];if(!w||w.grenade||w.drone)return;
+    const empty=(player.ammo[player.weapon]||0)<=0,rel=player.reload>0;
+    if(!(empty||rel))return;
+    const mob=typeof isMobileUI==='function'&&isMobileUI();
+    ctx.save();
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    const y=mob?168:H-150;
+    ctx.font='900 28px Impact, "Arial Black", sans-serif';
+    const pulse=0.7+0.3*Math.sin((state.time||0)*9);
+    ctx.fillStyle=rel?'rgba(255,210,90,'+pulse+')':'rgba(220,40,40,'+pulse+')';
+    ctx.fillText(rel?( (typeof isWilmer==='function'&&isWilmer())?'LADDAR…':'RELOADING…'):( (typeof isWilmer==='function'&&isWilmer())?'TOMT — LADDA':'EMPTY — RELOAD'),W/2,y);
+    ctx.restore();
+  };
 }
 </script></body></html>
