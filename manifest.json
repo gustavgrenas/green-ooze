@@ -2,7 +2,7 @@
   "name": "Green Ooze",
   "short_name": "Green Ooze",
   "description": "A self-contained HTML5 shooter.",
-  "start_url": "./?v=17",
+  "start_url": "./?v=18",
   "scope": "./",
   "display": "standalone",
   "orientation": "landscape",

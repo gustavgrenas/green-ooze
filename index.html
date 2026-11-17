@@ -1,6 +1,6 @@
 <!doctype html>
-<!-- green-ooze v17 -->
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Green Ooze"><meta name="theme-color" content="#0b1408"><meta name="application-name" content="Green Ooze"><title>Green Ooze</title><link rel="manifest" href="manifest.json?v=17"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<!-- green-ooze v18 -->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Green Ooze"><meta name="theme-color" content="#0b1408"><meta name="application-name" content="Green Ooze"><title>Green Ooze</title><link rel="manifest" href="manifest.json?v=18"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <style>:root{--sa-t:env(safe-area-inset-top,0px);--sa-r:env(safe-area-inset-right,0px);--sa-b:env(safe-area-inset-bottom,0px);--sa-l:env(safe-area-inset-left,0px)}html,body{margin:0;background:#000;overflow:hidden;height:100%;height:100dvh;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:none}canvas{display:block;position:fixed;left:0;top:0;margin:0;cursor:crosshair;touch-action:none;-webkit-user-select:none}</style>
 </head><body><canvas id="c"></canvas>
 <script>
@@ -4791,7 +4791,7 @@ function joyLayout(){
   );
   return {L:{x:130,y:H-130,r:stickR},R:{x:W-130,y:H-130,r:stickR},btns};
 }
-const GAME_VERSION='v17';
+const GAME_VERSION='v18';
 let _ignoreMouseUntil=0;
 function suppressGhostMouse(){_ignoreMouseUntil=performance.now()+700;}
 function inMenuState(){
@@ -6717,7 +6717,7 @@ function render(){
   const lb=typeof lightBoost==='function'?lightBoost():0;
   const fogA=(typeof isWilmer==='function'&&isWilmer()?0.10:0.12)*(1-lb*0.85);
   ctx.fillStyle=(typeof isWilmer==='function'&&isWilmer())?'rgba(30,50,70,'+fogA+')':'rgba(40,25,20,'+fogA+')';ctx.fillRect(0,0,W,H);
-  ctx.save();ctx.globalAlpha=0.07*(1-lb*0.6);ctx.translate(-((Math.random()*256)|0),-((Math.random()*256)|0));ctx.fillStyle=grainPat;ctx.fillRect(0,0,W+256,H+256);ctx.restore();
+  if(!(typeof menuFXOff==='function'&&menuFXOff())){ctx.save();ctx.globalAlpha=0.07*(1-lb*0.6);ctx.translate(-((Math.random()*256)|0),-((Math.random()*256)|0));ctx.fillStyle=grainPat;ctx.fillRect(0,0,W+256,H+256);ctx.restore();}
   ctx.save();ctx.globalAlpha=Math.max(0.12,1-lb*0.85);ctx.drawImage(vign,0,0);ctx.restore();
   if(state.hurtFlash>0){ctx.fillStyle='rgba(120,0,0,'+state.hurtFlash*0.5+')';ctx.fillRect(0,0,W,H);}
   if(state.hitT>0){const k=state.hitT/0.14,r0=6+(1-k)*3,r1=13+(1-k)*3;ctx.strokeStyle=state.hitKill?'rgba(220,30,30,'+k+')':'rgba(240,235,225,'+k+')';ctx.lineWidth=state.hitKill?3:2;ctx.beginPath();
@@ -6766,7 +6766,7 @@ function drawHUD(){
   ctx.font=mob?'bold 18px monospace':'bold 14px monospace';ctx.textBaseline='top';
   ctx.fillStyle='rgba(0,0,0,0.55)';ctx.fillRect(20,20,mob?260:224,mob?78:64);
   ctx.fillStyle='#3a0a0a';ctx.fillRect(28,28,mob?244:208,mob?16:12);ctx.fillStyle='#a31212';ctx.fillRect(28,28,(mob?244:208)*clamp(player.hp/100,0,1),mob?16:12);
-  ctx.fillStyle='#d6cdbd';ctx.fillText((typeof isTed==='function'&&isTed())?'TED':(typeof isWilmer==='function'&&isWilmer())?'VPL WILMER':'SGT. GUS THAW',28,mob?52:46);ctx.font=mob?'bold 14px monospace':'bold 11px monospace';ctx.fillStyle=PAL.tan;ctx.fillText((typeof isWilmer==='function'&&isWilmer()?{stand:'STÅENDE',crouch:'KNÄSTÅENDE',prone:'LIGGER'}:{stand:'STANDING',crouch:'KNEELING',prone:'PRONE'})[player.stance]||'',28,mob?78:70);ctx.font=mob?'bold 18px monospace':'bold 14px monospace';ctx.fillStyle='#d6cdbd';if(typeof isWilmer==='function'&&isWilmer()){if(typeof drawSEPatch==='function')drawSEPatch(mob?200:168,mob?60:53,1);}else drawUSPatch(mob?192:160,mob?60:53,1);if(state.god){ctx.fillStyle=PAL.tan;ctx.fillText('GOD',mob?230:200,mob?52:46);}
+  ctx.fillStyle='#d6cdbd';ctx.fillText((typeof isTed==='function'&&isTed())?'TED':(typeof isWilmer==='function'&&isWilmer())?'VPL WILMER':'SGT. GUS THAW',28,mob?52:46);ctx.font=mob?'bold 20px monospace':'bold 11px monospace';ctx.fillStyle=PAL.tan;ctx.fillText((typeof isWilmer==='function'&&isWilmer()?{stand:'STÅENDE',crouch:'KNÄSTÅENDE',prone:'LIGGER'}:{stand:'STANDING',crouch:'KNEELING',prone:'PRONE'})[player.stance]||'',28,mob?78:70);ctx.font=mob?'bold 18px monospace':'bold 14px monospace';ctx.fillStyle='#d6cdbd';if(typeof isWilmer==='function'&&isWilmer()){if(typeof drawSEPatch==='function')drawSEPatch(mob?200:168,mob?60:53,1);}else drawUSPatch(mob?192:160,mob?60:53,1);if(state.god){ctx.fillStyle=PAL.tan;ctx.fillText('GOD',mob?230:200,mob?52:46);}
   ctx.font=mob?'bold 16px monospace':'bold 12px monospace';
   if(!mob)for(let i=0;i<WKEYS.length;i++){const k=WKEYS[i],w=WEAPONS[k],sel=player.weapon===k,slot=WKEYS.length>6?152:200,x=20+i*slot;
     const bw=WKEYS.length>6?146:194;ctx.fillStyle=sel?'rgba(184,155,106,0.92)':'rgba(0,0,0,0.55)';ctx.fillRect(x,H-56,bw,34);
@@ -6776,9 +6776,9 @@ function drawHUD(){
     ctx.fillStyle=sel?'#3a1010':'#7d7466';ctx.fillText(am,x+6,H-35);
     if(sel&&player.reload>0){ctx.fillStyle='#6d0f0f';ctx.fillRect(x,H-24,bw*(1-player.reload/w.reloadT),2);}}
   { const w=WEAPONS[player.weapon];const ax=mob?W-110:W-150,ay=mob?118:H-128,tx=mob?W-24:W-24,ty=mob?132:H-96,ny=mob?118:H-110;
-    if(typeof drawGunIcon==='function'){ctx.save();ctx.translate(ax,ay);drawGunIcon(player.weapon,0,0,mob?2.2:2.05,true);ctx.restore();}ctx.textAlign='right';ctx.font=mob?'900 36px Impact, "Arial Black", sans-serif':'900 30px Impact, "Arial Black", sans-serif';ctx.fillStyle=player.reload>0?'#a31212':'#d6cdbd';
+    if(typeof drawGunIcon==='function'){ctx.save();ctx.translate(ax,ay);drawGunIcon(player.weapon,0,0,mob?2.2:2.05,true);ctx.restore();}ctx.textAlign='right';ctx.font=mob?'900 42px Impact, "Arial Black", sans-serif':'900 30px Impact, "Arial Black", sans-serif';ctx.fillStyle=player.reload>0?'#a31212':'#d6cdbd';
     ctx.fillText(w.drone?('x'+player.drones):w.rocket?('x'+(player.pskott||0)):w.grenade?('x'+player.grenades):(player.reload>0?'RELOADING':player.ammo[player.weapon]+' / '+w.mag),tx,ty);
-    ctx.font=mob?'bold 14px monospace':'bold 12px monospace';ctx.fillStyle='#8f8676';ctx.fillText(w.name,tx,ny);ctx.textAlign='left';ctx.font=mob?'bold 18px monospace':'bold 14px monospace';}
+    ctx.font=mob?'bold 22px monospace':'bold 12px monospace';ctx.fillStyle='#8f8676';ctx.fillText(w.name,tx,ny);ctx.textAlign='left';ctx.font=mob?'bold 18px monospace':'bold 14px monospace';}
   ctx.textAlign='right';ctx.fillStyle='#d6cdbd';
   ctx.fillText(((typeof isTed==='function'&&isTed())?'UNIT-101: ':(typeof isWilmer==='function'&&isWilmer())?'RÖD STYRKA KIA: ':'BLACK MERIDIAN KIA: ')+state.kills,mob?W/2+200:W-24,mob?24:24);
   ctx.fillStyle='#8f8676';ctx.fillText(((typeof isWilmer==='function'&&isWilmer())?'FIENDER: ':'HOSTILES: ')+enemies.filter(e=>e.alive).length+(typeof eVehs!=='undefined'&&isWilmer()?' +'+eVehs.filter(v=>v.alive).length+' FORDON':''),mob?W/2+200:W-24,mob?46:44);ctx.textAlign='left';
@@ -6789,7 +6789,7 @@ function drawHUD(){
   ctx.fillText((typeof isWilmer==='function'&&isWilmer())?'A/D rör dig · W/↑ hoppa · S knä/ligg · mus sikte/eld · 1-4 vapen · R ladda · E fordon · F plocka upp / vänd · N slow-mo · M tyst':'A/D move · W/↑ jump · S kneel/prone · mouse aim/fire · 1-4 weapons · R reload · E truck · F pick up / flip · N slow-mo · M mute',W/2,H-78);
   ctx.fillStyle='rgba(214,205,189,0.4)';ctx.fillText('debug: K spawn · T truck · G god · Backspace restart',W/2,H-66);ctx.textAlign='left';}
   ctx.textBaseline='alphabetic';
-  if(state.msgT>0&&state.msg){ctx.font='bold 18px monospace';ctx.textAlign='center';ctx.fillStyle='rgba(230,220,200,'+Math.min(1,state.msgT)+')';ctx.fillText(state.msg,W/2,130);ctx.textAlign='left';}
+  if(state.msgT>0&&state.msg){ctx.font=(typeof isMobileUI==='function'&&isMobileUI()?'bold 26px':'bold 18px')+' monospace';ctx.textAlign='center';ctx.fillStyle='rgba(230,220,200,'+Math.min(1,state.msgT)+')';ctx.fillText(state.msg,W/2,130);ctx.textAlign='left';}
   const banner=(t,col,sub)=>{ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(0,H/2-56,W,104);ctx.textAlign='center';ctx.font='900 46px Impact, "Arial Black", sans-serif';ctx.fillStyle=col;ctx.fillText(t,W/2,H/2);ctx.font='bold 16px monospace';ctx.fillStyle='#d6cdbd';ctx.fillText(sub,W/2,H/2+32);ctx.textAlign='left';};
   if(state.over&&!state.scoreScreen)banner((typeof isWilmer==='function'&&isWilmer())?'WILMER IS DOWN':'GUS THAW IS DOWN','#a31212',(typeof isWilmer==='function'&&isWilmer())?'tryck R eller Backspace för att börja om':'press R or Backspace to redeploy');
   else if(state.won&&!state.scoreScreen)banner((typeof isWilmer==='function'&&isWilmer())?'ÖVNING SLUT – BRA JOBBAT, WILMER!':'GUS THAW EXTRACTED',(typeof isWilmer==='function'&&isWilmer())?'#c9a227':'#b89b6a',(typeof isWilmer==='function'&&isWilmer())?'Röd styrka KIA: '+state.kills+'  ·  tryck R för att köra igen':'Black Meridian KIA: '+state.kills+'  ·  press R to replay');
@@ -6799,7 +6799,7 @@ function drawHUD(){
 let last=performance.now(),acc=0;
 function frame(now){const raw=Math.min(0.1,(now-last)/1000);last=now;if(typeof tickTimeScale==='function')tickTimeScale(raw);const sc=typeof gameScale==='function'?gameScale():(state&&state.slow>0?0.3:1);acc+=raw*sc;let n=0;while(acc>=DT&&n<4){update(DT);acc-=DT;n++;}if(n===4)acc=0;render();requestAnimationFrame(frame);}
 resetGame(true);
-window.__game={get GAME_VERSION(){return typeof GAME_VERSION!=='undefined'?GAME_VERSION:'v17'},cssToCanvas,get state(){return state},get player(){return player},get truck(){return truck},get enemies(){return enemies},get ragdolls(){return ragdolls},get particles(){return particles},
+window.__game={get GAME_VERSION(){return typeof GAME_VERSION!=='undefined'?GAME_VERSION:'v18'},cssToCanvas,get state(){return state},get player(){return player},get truck(){return truck},get enemies(){return enemies},get ragdolls(){return ragdolls},get particles(){return particles},
   keys,mouse,update,render,pose,makeBomber,bomberBoom,get boss(){return state.boss},startBoss,destroyTech,damageTech,ARENA,launchDrone,SFX,setStance,enterTruck,exitTruck,explode,hitChar,onKey,get cam(){return cam},isSolid,groundY,get crates(){return crates},get walls(){return walls},bloodCov,
   startMode,isWilmer,isTed,get squad(){return squad},get eVehs(){return eVehs},get smokes(){return smokes},launchSmoke,fireRWS,completeMission,makePatria,resetGame,get GAME_MODE(){return GAME_MODE},drawWeaponLineupSheet,drawGunLocal,drawGunIcon,gunVisual,get drops(){return drops},get ammoCrates(){return ammoCrates},makeSniper,makeShield,makeGrenadier,tryPickup,applyLoadout,confirmLoadout,openLoadout,openWilmerSplash,openMeridianSplash,openModeSplash,drawModeSplash,triggerSlowmo,gameScale,noteKill,shouldSkipLoadout,get btEnabled(){return btEnabled},set btEnabled(v){btEnabled=!!v},laserClip,shieldBlock,
   startMission,openMissionSelect,openScoreScreen,computeScore,resetProgress,loadProgress,get CURRENT_MISSION(){return CURRENT_MISSION},set CURRENT_MISSION(v){CURRENT_MISSION=v},get lastScore(){return lastScore},get nvgOn(){return nvgOn},set nvgOn(v){nvgOn=!!v},get QUALITY(){return QUALITY},set QUALITY(v){QUALITY=v},get INPUT_MODE(){return INPUT_MODE},set INPUT_MODE(v){INPUT_MODE=v},get civilians(){return civilians},get rangeTargets(){return rangeTargets},get eDrones(){return eDrones},get convoy(){return convoy},throwFlare,togglePause,rumble,get lastPad(){return lastPad},MDEFS,get tedUnit(){return tedUnit},unitReveal,unitCrawl,unitPressKill,drawTedArt,get tedArtReady(){return typeof tedArtReady!=='undefined'&&tedArtReady},get vhsOn(){return vhsOn},set vhsOn(v){vhsOn=!!v},get tedPress(){return tedPress},get tedTanker(){return tedTanker},get tedPolice(){return tedPolice},get fxDebris(){return fxDebris},get envProps(){return envProps},addChunk,debrisBurst,wakeChunks,chunksMaxSpeed,gatherLights,get lightN(){return lightN},initFxWorld,isNight,duskAmt,addLight,scareBirds};
@@ -6931,5 +6931,539 @@ if(window.__game){
   G.applyLoadout=typeof applyLoadout==='function'?applyLoadout:G.applyLoadout;
   G.WKEYS=function(){return WKEYS;};
   Object.defineProperty(G,'WKEYS_NOW',{get:()=>WKEYS});
+}
+/* ---------------- pass 18: crisp mobile menus, hi-DPI canvas ---------------- */
+function canvasDpr(){
+  try{return Math.max(1, Math.min(3, (typeof devicePixelRatio==='number'&&devicePixelRatio)||1));}catch(e){return 1;}
+}
+function applyCanvasBacking(){
+  if(!cv)return;
+  const r=cv.getBoundingClientRect();
+  const cssW=Math.max(1,r.width||W), cssH=Math.max(1,r.height||H);
+  const dpr=canvasDpr();
+  const bw=Math.max(1,Math.round(cssW*dpr)), bh=Math.max(1,Math.round(cssH*dpr));
+  if(cv.width!==bw||cv.height!==bh){cv.width=bw;cv.height=bh;}
+  beginCrispFrame();
+}
+function beginCrispFrame(){
+  if(!ctx||!cv||!cv.width)return;
+  ctx.setTransform(cv.width/W,0,0,cv.height/H,0,0);
+  ctx.imageSmoothingEnabled=true;
+  if(ctx.imageSmoothingQuality)ctx.imageSmoothingQuality='high';
+}
+function menuFXOff(){
+  if(typeof TUT_ON!=='undefined'&&TUT_ON)return true;
+  if(!state)return false;
+  return !!(state.splash||state.loadout||state.missionSelect||state.scoreScreen||state.paused||state.title>0||state.lineup);
+}
+function cssToLogical(px){
+  const ch=(cv&&cv.getBoundingClientRect&&cv.getBoundingClientRect().height)||H;
+  return px*H/Math.max(1,ch);
+}
+function uiMinPx(px,cssMin){
+  const mob=typeof isMobileUI==='function'&&isMobileUI();
+  if(!mob)return px;
+  return Math.max(px, Math.ceil(cssToLogical(cssMin==null?14:cssMin)));
+}
+function uiFont(px, weight, family, cssMin){
+  const s=uiMinPx(px,cssMin);
+  return (weight?weight+' ':'')+s+'px '+(family||'monospace');
+}
+function fillTextOL(text,x,y,fill,sw,maxW){
+  ctx.save();
+  ctx.lineJoin='round';ctx.miterLimit=2;
+  const fs=parseFloat(ctx.font)||16;
+  if(sw==null)sw=Math.max(3, Math.min(8, fs*0.16));
+  ctx.strokeStyle='rgba(0,0,0,0.9)';ctx.lineWidth=sw;
+  if(maxW){ctx.strokeText(text,x,y,maxW);ctx.fillStyle=fill||'#e6dccb';ctx.fillText(text,x,y,maxW);}
+  else{ctx.strokeText(text,x,y);ctx.fillStyle=fill||'#e6dccb';ctx.fillText(text,x,y);}
+  ctx.restore();
+}
+function pathRoundRect(x,y,w,h,r){
+  r=Math.max(0,Math.min(r==null?10:r,w/2,h/2));
+  if(ctx.roundRect){ctx.beginPath();ctx.roundRect(x,y,w,h,r);return;}
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+function drawPanel(x,y,w,h,opts){
+  opts=opts||{};
+  const r=opts.r==null?12:opts.r;
+  ctx.save();
+  pathRoundRect(x,y,w,h,r);
+  ctx.fillStyle=opts.fill||'rgba(8,8,8,0.78)';
+  ctx.fill();
+  ctx.strokeStyle=opts.stroke||'#b89b6a';
+  ctx.lineWidth=opts.line||2.5;
+  ctx.stroke();
+  if(opts.hot){
+    ctx.strokeStyle='rgba(230,210,150,0.95)';ctx.lineWidth=(opts.line||2.5)+1.5;ctx.stroke();
+  }
+  ctx.restore();
+}
+
+/* hi-dpi: hook fit + every frame */
+if(typeof fit==='function'){
+  const _p18fit=fit;
+  fit=function(){ _p18fit(); applyCanvasBacking(); };
+  try{fit();}catch(e){}
+}
+if(typeof render==='function'){
+  const _p18render=render;
+  render=function(){ beginCrispFrame(); return _p18render.apply(this,arguments); };
+}
+
+/* skip grain / VHS / scanlines on menus (gameplay filters stay optional) */
+if(typeof pass10PreRender==='function'){
+  const _p18pre=pass10PreRender;
+  pass10PreRender=function(){
+    beginCrispFrame();
+    if(state&&state.title>0.8&&state.select){
+      const a=Math.min(1,state.title>10?1:state.title/0.8);
+      if(typeof drawModeSelect==='function')drawModeSelect(a);
+      else if(typeof drawTitle==='function')drawTitle(a);
+      if(typeof drawInputOverlays==='function')drawInputOverlays();
+      if(typeof drawRotateOverlay==='function')drawRotateOverlay();
+      return true;
+    }
+    return _p18pre.apply(this,arguments);
+  };
+}
+
+if(typeof drawVHS==='function'){
+  const _p18vhs=drawVHS;
+  drawVHS=function(){
+    if(menuFXOff())return;
+    // draw the backing store into logical space (cv.width may be css*DPR, not W)
+    ctx.save();ctx.globalCompositeOperation='screen';ctx.globalAlpha=0.07;
+    ctx.drawImage(cv,0,0,cv.width,cv.height,-1.5,0,W,H);
+    ctx.fillStyle='#ff0044';ctx.globalAlpha=0.03;ctx.fillRect(0,0,W,H);
+    ctx.restore();
+    ctx.fillStyle='rgba(0,0,0,0.18)';
+    for(let y=0;y<H;y+=3)ctx.fillRect(0,y,W,1);
+    const y=((state.time*40)%H)|0;
+    ctx.fillStyle='rgba(255,255,255,0.04)';ctx.fillRect(0,y,W,2);
+  };
+}
+
+/* 2x sharpened key-art cache — no file-size growth, avoids live upscale blur */
+function keyArtHi(img){
+  if(!img||!img.width)return img;
+  if(img._hi)return img._hi;
+  const w=img.width*2,h=img.height*2;
+  const c=document.createElement('canvas');c.width=w;c.height=h;
+  const g=c.getContext('2d');
+  g.imageSmoothingEnabled=true;if(g.imageSmoothingQuality)g.imageSmoothingQuality='high';
+  g.drawImage(img,0,0,w,h);
+  try{
+    const src=g.getImageData(0,0,w,h), s=src.data;
+    const tmp=new Uint8ClampedArray(s.length);
+    // separable 3-tap box blur, then unsharp amount 0.7
+    const blur1=(inp,out,horiz)=>{
+      for(let y=0;y<h;y++){
+        for(let x=0;x<w;x++){
+          let r=0,g=0,b=0,a=0,n=0;
+          for(let k=-1;k<=1;k++){
+            const xx=horiz?clamp(x+k,0,w-1):x, yy=horiz?y:clamp(y+k,0,h-1), i=(yy*w+xx)*4;
+            r+=inp[i];g+=inp[i+1];b+=inp[i+2];a+=inp[i+3];n++;
+          }
+          const o=(y*w+x)*4;out[o]=r/n;out[o+1]=g/n;out[o+2]=b/n;out[o+3]=a/n;
+        }
+      }
+    };
+    const mid=new Uint8ClampedArray(s.length);
+    blur1(s,mid,true);blur1(mid,tmp,false);
+    const amt=0.7;
+    for(let i=0;i<s.length;i+=4){
+      s[i]=Math.max(0,Math.min(255,s[i]+(s[i]-tmp[i])*amt));
+      s[i+1]=Math.max(0,Math.min(255,s[i+1]+(s[i+1]-tmp[i+1])*amt));
+      s[i+2]=Math.max(0,Math.min(255,s[i+2]+(s[i+2]-tmp[i+2])*amt));
+    }
+    g.putImageData(src,0,0);
+  }catch(e){}
+  img._hi=c;return c;
+}
+if(typeof drawKeyArt==='function'){
+  const _p18ka=drawKeyArt;
+  drawKeyArt=function(kind,x,y,w,h,fy){
+    const img=kind==='wilmer'?wilmerArtImg:kind==='ted'?tedArtImg:meridianArtImg;
+    if(!img||!img.width)return _p18ka(kind,x,y,w,h,fy);
+    const src=keyArtHi(img)||img;
+    const ir=src.width/src.height,r=w/h;
+    let dw,dh,dx,dy;
+    if(ir>r){dh=h;dw=h*ir;dx=x-(dw-w)/2;dy=y;}
+    else{dw=w;dh=w/ir;dx=x;dy=y-(dh-h)*(fy==null?0.42:fy);}
+    ctx.save();ctx.imageSmoothingEnabled=true;if(ctx.imageSmoothingQuality)ctx.imageSmoothingQuality='high';
+    ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();ctx.drawImage(src,dx,dy,dw,dh);ctx.restore();
+    return true;
+  };
+}
+
+/* taller title cards on mobile (hit box still covers the original 360x168 at the same origin) */
+if(typeof layoutTitleCards==='function'){
+  const _p18lay=layoutTitleCards;
+  layoutTitleCards=function(){
+    _p18lay();
+    if(typeof isMobileUI==='function'&&isMobileUI()&&TITLE_CARDS){
+      for(const c of TITLE_CARDS){c.h=Math.max(c.h, Math.min(232, H-c.y-64));}
+    }
+  };
+}
+
+/* crisp menu typography — wrap the outermost drawers */
+if(typeof drawMenuButton==='function'){
+  const _p18btn=drawMenuButton;
+  drawMenuButton=function(b,hot){
+    if(!b)return;
+    const mob=typeof isMobileUI==='function'&&isMobileUI();
+    if(!mob){ _p18btn(b,hot); return; }
+    ctx.save();
+    drawPanel(b.x,b.y,b.w,b.h,{fill:b.primary?(hot?'#d4b47a':'#b89b6a'):(hot?'#3a3834':'#161614'),stroke:b.primary?'#efe6d2':'#c9b48a',line:2.6,hot:hot,r:10});
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font=uiFont(24,'900','Impact, "Arial Black", sans-serif',16);
+    const col=b.primary?'#111':'#f0e8d8';
+    fillTextOL(b.lab,b.x+b.w/2,b.y+b.h/2+1,col,4);
+    ctx.restore();
+    ctx.textBaseline='alphabetic';ctx.textAlign='left';
+  };
+}
+
+if(typeof drawModeSelect==='function'){
+  const _p18dms=drawModeSelect;
+  drawModeSelect=function(a){
+    const mob=typeof isMobileUI==='function'&&isMobileUI();
+    if(!mob){ _p18dms(a); return; }
+    a=a==null?1:a;
+    ctx.save();
+    ctx.fillStyle='rgb(8,9,12)';ctx.fillRect(0,0,W,H);ctx.globalAlpha=a;ctx.textAlign='center';ctx.textBaseline='alphabetic';
+    if(typeof oozeLogo==='function')oozeLogo('GREEN OOZE',W/2,H/2-120,state.time);
+    ctx.globalAlpha=a;
+    ctx.fillStyle='#c41a1a';ctx.fillRect(W/2-280,H/2-28,560,4);
+    ctx.font=uiFont(22,'bold','monospace',15);
+    fillTextOL(typeof promptStr==='function'?promptStr('Välj uppdrag  ·  tryck ett kort','D-pad  ·  A välj'):'Välj uppdrag  ·  tryck ett kort',W/2,H/2+2,'#e8dfcf',4);
+    if(typeof layoutTitleCards==='function')layoutTitleCards();
+    for(const [i,c] of TITLE_CARDS.entries()){
+      const hot=mouse.x>=c.x&&mouse.x<=c.x+c.w&&mouse.y>=c.y&&mouse.y<=c.y+c.h;
+      ctx.save();
+      pathRoundRect(c.x,c.y,c.w,c.h,12);ctx.clip();
+      if(c.mode==='meridian'&&typeof drawMeridianArt==='function')drawMeridianArt(c.x,c.y,c.w,c.h,0.46);
+      else if(c.mode==='wilmer'&&typeof drawWilmerArt==='function')drawWilmerArt(c.x,c.y,c.w,c.h,0.46);
+      else if(c.mode==='ted'&&typeof drawTedArt==='function')drawTedArt(c.x,c.y,c.w,c.h,0.12);
+      const grd=ctx.createLinearGradient(0,c.y+c.h*0.28,0,c.y+c.h);
+      grd.addColorStop(0,'rgba(0,0,0,0.15)');grd.addColorStop(1,'rgba(0,0,0,0.82)');
+      ctx.fillStyle=grd;ctx.fillRect(c.x,c.y,c.w,c.h);
+      ctx.restore();
+      drawPanel(c.x,c.y,c.w,c.h,{fill:'rgba(0,0,0,0)',stroke:hot?(c.mode==='ted'?'#ff4ad8':'#e2c989'):'#8a7a5c',line:hot?3.5:2.4,hot:hot,r:12});
+      ctx.save();
+      pathRoundRect(c.x,c.y,c.w,c.h,12);ctx.clip();
+      ctx.textAlign='center';
+      const mid=c.x+c.w/2, y0=c.y+c.h-86, mw=c.w-28;
+      ctx.font=uiFont(16,'900','monospace',13);
+      fillTextOL(String(i+1),c.x+22,c.y+28,'#f0e6d2',3);
+      if(c.mode==='meridian'){
+        ctx.font=uiFont(22,'900','Impact, "Arial Black", sans-serif',15);
+        fillTextOL('BLACK MERIDIAN',mid,y0,'#f3ead8',5,mw);
+        ctx.font=uiFont(16,'bold','monospace',14);
+        fillTextOL('SGT. GUS THAW',mid,y0+26,'#e0c07a',4,mw);
+        ctx.font=uiFont(15,'bold','monospace',14);
+        fillTextOL('Rensa zonen  ·  nå evak',mid,y0+50,'#efe6d6',3,mw);
+      }else if(c.mode==='wilmer'){
+        ctx.font=uiFont(20,'900','Impact, "Arial Black", sans-serif',15);
+        fillTextOL('WILMER — BODEN',mid,y0,'#f0f4f8',5,mw);
+        ctx.font=uiFont(16,'bold','monospace',14);
+        fillTextOL('I 19  ·  Boden',mid,y0+26,'#d2d8de',4,mw);
+        ctx.font=uiFont(15,'bold','monospace',14);
+        fillTextOL('PB 360  mot  Röd styrka',mid,y0+50,'#e8eef4',3,mw);
+      }else{
+        ctx.font=uiFont(22,'900','Impact, "Arial Black", sans-serif',15);
+        fillTextOL('TEDMINATOR',mid,y0,'#ff7ae8',5,mw);
+        ctx.font=uiFont(16,'bold','monospace',14);
+        fillTextOL('Starring  TED',mid,y0+26,'#7af6ff',4,mw);
+        ctx.font=uiFont(15,'bold','monospace',14);
+        fillTextOL('NEXUS  ·  Unit-101',mid,y0+50,'#f0e0f8',3,mw);
+      }
+      ctx.restore();
+    }
+    if(typeof drawUIModeToggle==='function')drawUIModeToggle();
+    if(typeof drawVersionTag==='function')drawVersionTag();
+    ctx.globalAlpha=1;ctx.textAlign='left';ctx.textBaseline='alphabetic';
+    ctx.restore();
+  };
+}
+
+if(typeof drawModeSplash==='function'){
+  const _p18spl=drawModeSplash;
+  drawModeSplash=function(){
+    const mob=typeof isMobileUI==='function'&&isMobileUI();
+    if(!mob){ _p18spl(); return; }
+    const wil=typeof isWilmer==='function'&&isWilmer(), ted=typeof isTed==='function'&&isTed();
+    const t=state.splashT||0,a=Math.min(1,t/0.7);
+    ctx.fillStyle=ted?'#08010c':wil?'#05070a':'#0c0806';ctx.fillRect(0,0,W,H);
+    ctx.globalAlpha=a;
+    if(ted&&typeof drawTedArt==='function')drawTedArt(0,0,W,H,0.5);
+    else if(wil&&typeof drawWilmerArt==='function')drawWilmerArt(0,0,W,H,0.5);
+    else if(typeof drawMeridianArt==='function')drawMeridianArt(0,0,W,H,0.5);
+    ctx.globalAlpha=1;
+    const grd=ctx.createLinearGradient(0,H-240,0,H);
+    grd.addColorStop(0,'rgba(0,0,0,0)');grd.addColorStop(0.45,'rgba(0,0,0,0.55)');grd.addColorStop(1,'rgba(0,0,0,0.88)');
+    ctx.fillStyle=grd;ctx.fillRect(0,H-250,W,250);
+    if(a>0.55){
+      ctx.textAlign='center';
+      ctx.font=uiFont(22,'bold','monospace',15);
+      const line=ted?'NEXUS  ·  starring TED':wil?'I 19  ·  Norrbottens regemente  ·  pansarpluton':'Operation: Black Meridian  ·  Sgt. Gus Thaw';
+      fillTextOL(line,W/2,H-148, ted?'#ff9ae0':wil?'#dce6ee':'#f0d9a4',4);
+      if(typeof drawSplashContinue==='function')drawSplashContinue();
+      ctx.textAlign='left';
+    }
+    if(typeof drawVersionTag==='function')drawVersionTag();
+  };
+}
+
+if(typeof drawMissionSelect==='function'){
+  const _p18ms=drawMissionSelect;
+  drawMissionSelect=function(){
+    const mob=typeof isMobileUI==='function'&&isMobileUI();
+    if(!mob){ _p18ms(); return; }
+    const mode=typeof currentModeId==='function'?currentModeId():(GAME_MODE||'meridian');
+    const wil=mode==='wilmer',ted=mode==='ted',arr=MDEFS[mode]||MDEFS.meridian;
+    ctx.fillStyle=ted?'#0a0210':wil?'#071018':'#0c0b0a';ctx.fillRect(0,0,W,H);
+    ctx.globalAlpha=0.28;
+    if(ted&&typeof drawTedArt==='function')drawTedArt(0,0,W,H,0.45);
+    else if(wil&&typeof drawWilmerArt==='function')drawWilmerArt(0,0,W,H,0.45);
+    else if(typeof drawMeridianArt==='function')drawMeridianArt(0,0,W,H,0.45);
+    ctx.globalAlpha=1;ctx.fillStyle='rgba(6,6,6,0.55)';ctx.fillRect(0,0,W,H);
+    ctx.textAlign='center';
+    ctx.font=uiFont(44,'900','Impact, "Arial Black", sans-serif',22);
+    fillTextOL(wil?'UPPDRAG':'MISSIONS',W/2,64, ted?'#ff4ad6':wil?'#e6edf2':'#f0e8d8',6);
+    ctx.font=uiFont(18,'bold','monospace',14);
+    fillTextOL(typeof promptStr==='function'?promptStr(wil?'Tryck ett uppdrag för att starta':'Tap a mission to deploy', wil?'A starta  ·  B tillbaka':'A start  ·  B back'):'Tap a mission',W/2,96,'#e2d8c6',4);
+    const top=170,h=120;
+    for(let i=0;i<arr.length;i++){
+      const y=top+i*h,d=arr[i],lock=typeof isUnlocked==='function'?!isUnlocked(d.id):false,sel=missionSelRow===i,best=typeof bestFor==='function'?bestFor(d.id):null;
+      drawPanel(80,y,W-160,h-14,{fill:sel?'rgba(20,16,10,0.88)':'rgba(8,8,8,0.78)',stroke:sel?(ted?'#ff4ad6':'#e2c989'):'#6a6256',line:sel?3:2.2,hot:sel,r:12});
+      ctx.textAlign='left';
+      ctx.font=uiFont(30,'900','Impact, "Arial Black", sans-serif',17);
+      fillTextOL((i+1)+'   '+(lock?(wil?'LÅST':'LOCKED'):d.name),110,y+44, lock?'#888':(sel?'#fff6e6':'#eadfcd'),5);
+      ctx.font=uiFont(18,'bold','monospace',14);
+      fillTextOL(d.blurb,110,y+74, lock?'#666':'#f0e6d4',4);
+      ctx.font=uiFont(16,'bold','monospace',14);
+      fillTextOL(d.sub,110,y+98, lock?'#555':'#e0c07a',3);
+      if(best){ctx.textAlign='right';ctx.font=uiFont(22,'900','monospace',15);fillTextOL((wil?best.betyg+'  ':'')+best.grade+'   '+best.score,W-110,y+54,'#f0d56a',4);}
+    }
+    const btns=typeof missionMenuBtns==='function'?missionMenuBtns():null;
+    if(btns&&typeof drawMenuButton==='function'){
+      drawMenuButton(btns.back, typeof hitRect==='function'&&hitRect(mouse.x,mouse.y,btns.back));
+      drawMenuButton(btns.start, typeof hitRect==='function'&&hitRect(mouse.x,mouse.y,btns.start));
+    }
+    if(typeof drawVersionTag==='function')drawVersionTag();
+    ctx.textAlign='left';
+  };
+}
+
+function loadoutGeom(){
+  const guns=typeof arsenalGuns==='function'?arsenalGuns():[];
+  const mob=typeof isMobileUI==='function'&&isMobileUI();
+  if(!mob)return {mob:false,top:168,rowH:90,guns};
+  const primY=118,rowH=148,mixY=118+148*2;
+  return {mob:true,guns,primY,secY:primY+rowH,mixY,rowH,mixH:120,cols:Math.min(3,Math.max(1,guns.length))};
+}
+if(typeof drawLoadout==='function'){
+  const _p18lo=drawLoadout;
+  drawLoadout=function(){
+    const mob=typeof isMobileUI==='function'&&isMobileUI();
+    if(!mob){ _p18lo(); return; }
+    const lo=state.lo||(typeof defaultLoadout==='function'?defaultLoadout():{}),wil=typeof isWilmer==='function'&&isWilmer(),ted=typeof isTed==='function'&&isTed();
+    const G=loadoutGeom(),guns=G.guns;
+    ctx.fillStyle=ted?'#0a0210':wil?'#071018':'#0c0b0a';ctx.fillRect(0,0,W,H);
+    ctx.globalAlpha=0.3;
+    if(ted&&typeof drawTedArt==='function')drawTedArt(0,0,W,H,0.45);
+    else if(wil&&typeof drawWilmerArt==='function')drawWilmerArt(0,0,W,H,0.45);
+    else if(typeof drawMeridianArt==='function')drawMeridianArt(0,0,W,H,0.45);
+    ctx.globalAlpha=1;ctx.fillStyle='rgba(6,6,6,0.62)';ctx.fillRect(0,0,W,H);
+    ctx.textAlign='center';
+    ctx.font=uiFont(40,'900','Impact, "Arial Black", sans-serif',20);
+    fillTextOL(wil?'UTRUSTNING':'LOADOUT',W/2,50, wil?'#e6edf2':'#f0e8d8',6);
+    ctx.font=uiFont(18,'bold','monospace',14);
+    fillTextOL(wil?'Välj vapen, granater och UAV':'Pick weapons, grenades and UAV',W/2,80,'#eadfcd',4);
+    const labels=wil?['PRIMÄR','SEKUNDÄR']:['PRIMARY','SECONDARY'];
+    const drawGunRow=(r,y,cur)=>{
+      const sel=loadoutRow===r;
+      drawPanel(40,y,W-80,G.rowH-10,{fill:sel?'rgba(28,22,12,0.9)':'rgba(8,8,8,0.78)',stroke:sel?'#e2c989':'#6a6256',line:sel?3:2.2,hot:sel,r:12});
+      ctx.textAlign='left';ctx.font=uiFont(18,'900','monospace',14);
+      fillTextOL(labels[r],56,y+28,sel?'#fff6e6':'#d8cbb6',4);
+      const cols=G.cols, rows=Math.ceil(guns.length/cols), gw=(W-200)/cols, tileH=54, tileY0=y+40;
+      for(let i=0;i<guns.length;i++){
+        const k=guns[i],col=i%cols,row=(i/cols)|0;
+        const x=90+col*gw, ty=tileY0+row*(tileH+8);
+        const on=k===cur, dis=r===1&&k===lo.primary;
+        ctx.save();
+        pathRoundRect(x,ty,gw-12,tileH,8);
+        ctx.fillStyle=on?'#c9b07a':dis?'rgba(40,40,40,0.55)':'rgba(12,12,12,0.9)';ctx.fill();
+        ctx.strokeStyle=on?'#111':'#8a7e6c';ctx.lineWidth=on?2.5:1.6;ctx.stroke();
+        if(typeof drawGunIcon==='function'&&!dis){ctx.save();if(typeof drawGunIcon==='function')drawGunIcon(k,x+28,ty+tileH/2,1.25,on);ctx.restore();}
+        ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.font=uiFont(16,'900','monospace',14);
+        fillTextOL(WEAPONS[k]?WEAPONS[k].name:k, x+(gw-12)/2+10, ty+tileH/2, on?'#111':dis?'#666':'#f2eadc', on?0:3);
+        ctx.restore();
+      }
+    };
+    drawGunRow(0,G.primY,lo.primary);
+    drawGunRow(1,G.secY,lo.secondary);
+    const y=G.mixY,selG=loadoutRow===2,selU=loadoutRow===3;
+    drawPanel(40,y,W/2-50,G.mixH-10,{fill:selG?'rgba(28,22,12,0.9)':'rgba(8,8,8,0.78)',stroke:selG?'#e2c989':'#6a6256',line:selG?3:2.2,hot:selG,r:12});
+    drawPanel(W/2+10,y,W/2-50,G.mixH-10,{fill:selU?'rgba(28,22,12,0.9)':'rgba(8,8,8,0.78)',stroke:selU?'#e2c989':'#6a6256',line:selU?3:2.2,hot:selU,r:12});
+    ctx.textAlign='center';
+    ctx.font=uiFont(18,'900','monospace',14);
+    fillTextOL(wil?'HANDGRANATER':'GRENADES',(40+W/2-10)/2,y+30,'#f0e8d8',4);
+    ctx.font=uiFont(36,'900','Impact, "Arial Black", sans-serif',20);
+    fillTextOL(String(lo.grenades|0),W/4+10,y+78,'#fff6e6',5);
+    ctx.font=uiFont(28,'900','Impact, sans-serif',16);
+    drawPanel(W/4-90,y+50,52,46,{fill:'#b89b6a',stroke:'#efe6d2',r:8});
+    drawPanel(W/4+58,y+50,52,46,{fill:'#b89b6a',stroke:'#efe6d2',r:8});
+    ctx.fillStyle='#111';ctx.textBaseline='middle';
+    ctx.fillText('−',W/4-64,y+74);ctx.fillText('+',W/4+84,y+74);
+    ctx.textBaseline='alphabetic';
+    ctx.font=uiFont(18,'900','monospace',14);
+    fillTextOL('UAV',W/2+(W/2-40)/2,y+30,'#f0e8d8',4);
+    const yesX=W/2+40, noX=W-220;
+    const drawYN=(on,x,lab)=>{drawPanel(x,y+48,120,50,{fill:on?'#c9b07a':'rgba(12,12,12,0.9)',stroke:on?'#111':'#8a7e6c',r:8,hot:on});ctx.font=uiFont(20,'900','monospace',15);ctx.textAlign='center';ctx.textBaseline='middle';fillTextOL(lab,x+60,y+74,on?'#111':'#f2eadc',on?0:3);ctx.textBaseline='alphabetic';};
+    drawYN(!!lo.drone,yesX,wil?'JA':'YES');drawYN(!lo.drone,noX,wil?'NEJ':'NO');
+    const lbtns=typeof loadoutMenuBtns==='function'?loadoutMenuBtns():null;
+    if(lbtns&&typeof drawMenuButton==='function'){
+      drawMenuButton(lbtns.back, typeof hitRect==='function'&&hitRect(mouse.x,mouse.y,lbtns.back));
+      drawMenuButton(lbtns.deploy, typeof hitRect==='function'&&hitRect(mouse.x,mouse.y,lbtns.deploy));
+    }
+    if(typeof drawVersionTag==='function')drawVersionTag();
+    ctx.textAlign='left';
+  };
+}
+if(typeof loadoutClick==='function'){
+  const _p18lc=loadoutClick;
+  loadoutClick=function(){
+    if(!(typeof isMobileUI==='function'&&isMobileUI())||(state&&state.splash)||!(state&&state.loadout&&state.lo)){return _p18lc.apply(this,arguments);}
+    const x=mouse.x,y=mouse.y,lo=state.lo,G=loadoutGeom(),guns=G.guns;
+    const btns=typeof loadoutMenuBtns==='function'?loadoutMenuBtns():null;
+    if(btns&&typeof hitRect==='function'){
+      if(hitRect(x,y,btns.back)){if(typeof openMissionSelect==='function')openMissionSelect();return;}
+      if(hitRect(x,y,btns.deploy)){confirmLoadout();return;}
+    }
+    if(x>W/2-110&&x<W/2+110&&y>H-86&&y<H-40){confirmLoadout();return;}
+    const inRow=(y0,h)=>y>y0&&y<y0+h-8;
+    if(inRow(G.primY,G.rowH)||inRow(G.secY,G.rowH)){
+      const r=inRow(G.primY,G.rowH)?0:1; loadoutRow=r;
+      const cols=G.cols,gw=(W-200)/cols,tileH=54,tileY0=(r===0?G.primY:G.secY)+40;
+      let picked=false;
+      for(let i=0;i<guns.length;i++){
+        const col=i%cols,row=(i/cols)|0,gx=90+col*gw,ty=tileY0+row*(tileH+8);
+        if(x>gx&&x<gx+gw-10&&y>ty&&y<ty+tileH){
+          picked=true;
+          if(r===0){lo.primary=guns[i];if(lo.secondary===lo.primary)lo.secondary=guns[(i+1)%guns.length];}
+          else if(guns[i]!==lo.primary)lo.secondary=guns[i];
+        }
+      }
+      if(!picked){
+        const cycle=(arr,cur,dir)=>{const i=Math.max(0,arr.indexOf(cur));return arr[(i+dir+arr.length)%arr.length];};
+        const dir=x<W/2?-1:1;
+        if(r===0){lo.primary=cycle(guns,lo.primary,dir);if(lo.secondary===lo.primary)lo.secondary=cycle(guns,lo.secondary,1);}
+        else{lo.secondary=cycle(guns,lo.secondary,dir);if(lo.secondary===lo.primary)lo.secondary=cycle(guns,lo.secondary,dir);}
+      }
+      return;
+    }
+    if(y>G.mixY&&y<G.mixY+G.mixH-8){
+      if(x<W/2){loadoutRow=2;lo.grenades=clamp((lo.grenades||0)+(x<W/4? -1:1),0,8);}
+      else{loadoutRow=3;lo.drone=x<W/2+(W/2)/2;}
+    }
+  };
+}
+
+if(typeof drawScoreScreen==='function'){
+  const _p18sc=drawScoreScreen;
+  drawScoreScreen=function(){
+    const mob=typeof isMobileUI==='function'&&isMobileUI();
+    if(!mob){ _p18sc(); return; }
+    const rec=lastScore||(typeof computeScore==='function'?computeScore():{}),wil=typeof isWilmer==='function'&&isWilmer(),ted=typeof isTed==='function'&&isTed();
+    ctx.fillStyle='#070706';ctx.fillRect(0,0,W,H);
+    if(ted&&typeof drawTedArt==='function'){ctx.globalAlpha=0.2;drawTedArt(0,0,W,H,0.45);ctx.globalAlpha=1;}
+    ctx.fillStyle='rgba(0,0,0,0.72)';ctx.fillRect(0,0,W,H);
+    ctx.textAlign='center';
+    ctx.font=uiFont(40,'900','Impact, "Arial Black", sans-serif',20);
+    fillTextOL(rec.won?(wil?'ÖVNING SLUT':'MISSION COMPLETE'):(wil?'UPPDRAG MISSLYCKAT':'MISSION FAILED'),W/2,70, rec.won?(wil?'#c9a227':'#e2c989'):'#ef3a3a',6);
+    ctx.font=uiFont(84,'900','Impact, "Arial Black", sans-serif',32);
+    fillTextOL(String(rec.grade||''),W/2,160,'#fff6e6',8);
+    if(wil&&rec.betyg){ctx.font=uiFont(24,'bold','monospace',16);fillTextOL(rec.betyg,W/2,196,'#f0d56a',4);}
+    if(rec.record){ctx.font=uiFont(18,'bold','monospace',14);fillTextOL(wil?'NYTT REKORD':'NEW RECORD',W/2,226,'#8ef04a',4);}
+    const rows=[
+      [wil?'Tid':'Time',typeof fmtTime==='function'?fmtTime(rec.time):String(rec.time||0)],
+      [wil?'Fällningar':'Kills',String(rec.kills||0)],
+      [wil?'Träffsäkerhet':'Accuracy',((rec.acc||0).toFixed?rec.acc.toFixed(1):rec.acc)+'%'],
+      [wil?'Huvudskott':'Headshots',String(rec.headshots||0)],
+      [wil?'Skada tagen':'Damage taken',String(rec.dmg||0)]
+    ];
+    if(rec.civTotal)rows.push([wil?'Gislan räddade':'Hostages saved',rec.civSaved+' / '+rec.civTotal+(rec.civKilled?'  (−'+rec.civKilled+')':'')]);
+    if(rec.targetsTotal)rows.push([wil?'Mål':'Targets',rec.targetsHit+' / '+rec.targetsTotal]);
+    rows.push([wil?'Poäng':'Score',String(rec.score||0)]);
+    let y=250;
+    ctx.font=uiFont(20,'bold','monospace',15);
+    for(const [a,b] of rows){ctx.textAlign='left';fillTextOL(a,W/2-260,y,'#d8cbb6',3);ctx.textAlign='right';fillTextOL(b,W/2+260,y,'#fff6e6',3);y+=32;}
+    const acts=typeof scoreActions==='function'?scoreActions():[],bw=260,gap=20,total=acts.length*bw+(acts.length-1)*gap,x0=W/2-total/2,by=H-120;
+    for(let i=0;i<acts.length;i++){
+      const x=x0+i*(bw+gap),on=scoreBtn===i,dim=!acts[i].ok&&acts[i].id==='next';
+      drawPanel(x,by,bw,64,{fill:dim?'#222':on?'#c9b07a':'#161614',stroke:dim?'#444':on?'#efe6d2':'#8a7e6c',r:10,hot:on});
+      ctx.textAlign='center';ctx.font=uiFont(20,'900','monospace',15);
+      fillTextOL(acts[i].lab,x+bw/2,by+36, dim?'#666':on?'#111':'#f2eadc', on?0:3);
+    }
+    ctx.font=uiFont(16,'bold','monospace',14);ctx.textAlign='center';
+    fillTextOL(typeof promptStr==='function'?promptStr(wil?'Välj och bekräfta':'Select and confirm', wil?'A bekräfta  ·  B uppdrag':'A confirm  ·  B missions'):'',W/2,H-28,'#e2d8c6',3);
+    ctx.textAlign='left';
+    if(typeof drawVersionTag==='function')drawVersionTag();
+  };
+}
+
+if(typeof drawPauseMenu==='function'){
+  const _p18pa=drawPauseMenu;
+  drawPauseMenu=function(){
+    const mob=typeof isMobileUI==='function'&&isMobileUI();
+    if(!mob){ _p18pa(); return; }
+    const wil=typeof isWilmer==='function'&&isWilmer(),items=pauseItems();
+    ctx.fillStyle='rgba(0,0,0,0.78)';ctx.fillRect(0,0,W,H);
+    ctx.textAlign='center';
+    ctx.font=uiFont(48,'900','Impact, "Arial Black", sans-serif',22);
+    fillTextOL(wil?'PAUS':'PAUSED',W/2,112,'#fff6e6',6);
+    const top=170,h=40;
+    for(let i=0;i<items.length;i++){
+      const y=top+i*48,on=pauseRow===i;
+      drawPanel(W/2-200,y,400,h,{fill:on?'#c9b07a':'#161614',stroke:on?'#efe6d2':'#6a6256',r:8,hot:on,line:on?2.8:2});
+      ctx.font=uiFont(20,'bold','monospace',15);
+      fillTextOL(items[i].lab,W/2,y+26,on?'#111':'#f2eadc',on?0:3);
+    }
+    ctx.font=uiFont(16,'bold','monospace',14);
+    const lines=wil
+      ?['Vänster spak: gå  ·  tryck UPP hoppa  ·  håll NER ducka','Höger spak: sikta och skjut  ·  BYT VAPEN i paus → Styrning']
+      :['Left stick: move  ·  flick UP jump  ·  hold DOWN crouch','Right stick: aim and fire  ·  weapon switch / Styrning'];
+    let y=H-78;for(const L of lines){fillTextOL(L,W/2,y,'#e2d8c6',3);y+=24;}
+    ctx.textAlign='left';
+  };
+}
+
+if(typeof drawVersionTag==='function'){
+  const _p18vt=drawVersionTag;
+  drawVersionTag=function(){
+    const mob=typeof isMobileUI==='function'&&isMobileUI();
+    if(!mob){ _p18vt(); return; }
+    ctx.save();ctx.globalAlpha=0.95;ctx.textAlign='right';
+    ctx.font=uiFont(16,'bold','monospace',13);
+    fillTextOL(typeof GAME_VERSION!=='undefined'?GAME_VERSION:'',W-16,26,'#f0e8d8',3);
+    ctx.restore();
+  };
+}
+
+if(window.__game){
+  const G=window.__game;
+  G.applyCanvasBacking=applyCanvasBacking;
+  G.beginCrispFrame=beginCrispFrame;
+  G.canvasDpr=canvasDpr;
+  G.menuFXOff=menuFXOff;
+  G.uiMinPx=uiMinPx;
+  G.keyArtHi=keyArtHi;
 }
 </script></body></html>
