@@ -1,6 +1,6 @@
 <!doctype html>
-<!-- green-ooze v16 -->
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Green Ooze"><meta name="theme-color" content="#0b1408"><meta name="application-name" content="Green Ooze"><title>Green Ooze</title><link rel="manifest" href="manifest.json?v=16"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<!-- green-ooze v17 -->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Green Ooze"><meta name="theme-color" content="#0b1408"><meta name="application-name" content="Green Ooze"><title>Green Ooze</title><link rel="manifest" href="manifest.json?v=17"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <style>:root{--sa-t:env(safe-area-inset-top,0px);--sa-r:env(safe-area-inset-right,0px);--sa-b:env(safe-area-inset-bottom,0px);--sa-l:env(safe-area-inset-left,0px)}html,body{margin:0;background:#000;overflow:hidden;height:100%;height:100dvh;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:none}canvas{display:block;position:fixed;left:0;top:0;margin:0;cursor:crosshair;touch-action:none;-webkit-user-select:none}</style>
 </head><body><canvas id="c"></canvas>
 <script>
@@ -562,7 +562,18 @@ const WEAPONS={
   drone:   {name:'FPV DRONE',   rate:0.8,  auto:false,len:14,drone:true,lw:4},
 };
 let WKEYS=['pistol','uzi','rifle','shotgun','spas','mg','launcher','drone'];
-function setWeapon(k){if(!player||player.weapon===k||state.drone)return;player.weapon=k;player.reload=0;player.bloom=0;}
+function setWeapon(k){
+  if(!player||!k||player.weapon===k||(state&&state.drone))return;
+  if(typeof WEAPONS==='undefined'||!WEAPONS[k])return;
+  player.weapon=k;
+  player.reload=0;player.reloadW=null;player.bloom=0;
+  player.cool=0;
+  if(!player.ammo)player.ammo={};
+  const w=WEAPONS[k];
+  if(w.mag&&(player.ammo[k]==null||!isFinite(player.ammo[k])))player.ammo[k]=w.mag;
+  // if the aim-stick is already held, let the new gun fire this frame (semi-auto needs a click)
+  if(typeof mouse!=='undefined'&&mouse&&(mouse.down||(typeof _touchFiring!=='undefined'&&_touchFiring)))mouse.clicked=true;
+}
 
 /* ---------------- state ---------------- */
 let state, player, enemies, ragdolls, particles, bullets, grenades, truck, cam;
@@ -1291,12 +1302,17 @@ function physChar(c,dt){
   for(const b of c.bleed){if(b.t<=0)continue;b.t-=dt;if(Math.sin(state.time*11)>0.2){const P=pose(c);emitBlood(P.neck[0],P.neck[1]+2,-c.facing*0.5,-0.6,2,180*(b.t/3)+60,0.4,true);}}
 }
 function tryFire(c,ox,oy){
-  const w=WEAPONS[c.weapon];
+  const w=WEAPONS[c.weapon];if(!w)return;
+  if(typeof c.cool!=='number'||!isFinite(c.cool))c.cool=0;
   if(c.reload>0||!(mouse.down&&c.cool<=0&&(w.auto||mouse.clicked)))return;
   if(w.drone){if(c.inTruck||c.drones<=0||state.drone){if(c.drones<=0&&mouse.clicked)SFX.click();return;}c.drones--;c.cool=w.rate;launchDrone(c,ox,oy);mouse.clicked=false;return;}
   if(w.rocket){if(fireRocket(c,ox,oy,c.aim)){c.cool=w.rate;if(typeof onGunFire==='function')onGunFire(c,ox,oy,c.aim);}mouse.clicked=false;return;}
   if(w.grenade){if(c.grenades<=0)return;c.grenades--;}
-  else{if(c.ammo[c.weapon]<=0){SFX.click();startReload(c);return;}c.ammo[c.weapon]--;}
+  else{
+    if(!c.ammo)c.ammo={};
+    if(c.ammo[c.weapon]==null&&w.mag)c.ammo[c.weapon]=w.mag;
+    if((c.ammo[c.weapon]||0)<=0){SFX.click();startReload(c);return;}c.ammo[c.weapon]--;
+  }
   const sm=STANCE[c.stance||'stand'];
   fire(c,ox,oy,c.aim+(Math.random()-0.5)*2*(c.bloom||0)*sm.spread,sm.spread);c.cool=w.rate;
   if(w.bloom)c.bloom=Math.min(w.bloomMax,(c.bloom||0)+w.bloom*sm.spread);
@@ -1305,7 +1321,7 @@ function tryFire(c,ox,oy){
     else{c.push=clamp((c.push||0)+rx,-320,320);if(!c.onGround)c.vy-=Math.sin(c.aim)*w.recoil*0.3;}}
   if(!w.grenade&&c.ammo[c.weapon]===0)startReload(c);
 }
-function startReload(c){const w=WEAPONS[c.weapon];if(w.grenade||c.reload>0||c.ammo[c.weapon]>=w.mag)return;c.reload=w.reloadT;c.reloadW=c.weapon;SFX.reload();}
+function startReload(c){const w=WEAPONS[c.weapon];if(!w||w.grenade||w.drone||!w.mag||!w.reloadT||c.reload>0)return;if((c.ammo&&c.ammo[c.weapon]||0)>=w.mag)return;c.reload=w.reloadT;c.reloadW=c.weapon;SFX.reload();}
 // stance tuning: speed, spread and recoil multipliers
 const STANCE={stand:{speed:270,spread:1,recoil:1},crouch:{speed:105,spread:0.55,recoil:0.45},prone:{speed:42,spread:0.3,recoil:0.2}};
 function canStand(c){return !isSolid(c.x,c.y-60)&&!isSolid(c.x,c.y-40);}
@@ -4382,8 +4398,15 @@ drawModeSplash=function(){
 let INPUT_MODE='keyboard', lastPad=null, padAimX=0, padAimY=0, adsZoom=1, QUALITY='high';
 let TOUCH=false, touches={}, leftStick={id:null,x:0,y:0,cx:0,cy:0,active:false}, rightStick={id:null,x:0,y:0,cx:0,cy:0,active:false};
 let UI_MODE='desktop', TUT_ON=false, TUT_T=0;
-const UI_PREF_KEY='greenooze_ui_mode', TUT_KEY='greenooze_tut_v15', LIGHT_KEY='greenooze_light';
-let LIGHT_LEVEL='bright', _touchFiring=false;
+const UI_PREF_KEY='greenooze_ui_mode', TUT_KEY='greenooze_tut_v15', LIGHT_KEY='greenooze_light', JUMPBTN_KEY='greenooze_jumpbtns';
+let LIGHT_LEVEL='bright', _touchFiring=false, _lsY=0, _lsJumpCool=0, _lsJumpArmed=true, _lsDuckHeld=false;
+function jumpBtnsOn(){try{return localStorage.getItem(JUMPBTN_KEY)==='1';}catch(e){return false;}}
+function setJumpBtns(on,save){
+  const v=!!on;
+  if(save){try{localStorage.setItem(JUMPBTN_KEY,v?'1':'0');}catch(e){}}
+  else {try{if(v)localStorage.setItem(JUMPBTN_KEY,'1');else localStorage.removeItem(JUMPBTN_KEY);}catch(e){}}
+}
+function jumpBtnsLabel(){return jumpBtnsOn()?'Hoppa/ducka-knappar: På':'Hoppa/ducka-knappar: Av';}
 function loadLightLevel(){
   try{const s=localStorage.getItem(LIGHT_KEY);if(s==='normal'||s==='bright'||s==='extra')return s;}catch(e){}
   return (typeof isMobileUI==='function'&&isMobileUI())||detectMobileDevice()?'bright':'normal';
@@ -4569,17 +4592,31 @@ function applyVirtualInput(){
     padPrev={};for(let i=0;i<16;i++)padPrev[i]=btn(gp,i);padPrev.rt=rt>0.6;
   }
 
-  // touch sticks
+  // touch sticks — jump on an upward flick/press, crouch while held down
+  if(_lsJumpCool>0)_lsJumpCool-=(typeof DT==='number'?DT:0.016);
   if(TOUCH&&leftStick.active){
     setk('KeyD',leftStick.x>0.3);setk('KeyA',leftStick.x<-0.3);
-    if(leftStick.y>0.65&&player&&player.alive&&!player.inTruck){
-      if(player.stance==='stand')setStance(player,'crouch');
-      else if(player.stance==='crouch'&&leftStick.y>0.85)setStance(player,'prone');
+    const y=leftStick.y, dy=y-_lsY;
+    if(player&&player.alive&&!player.inTruck){
+      if(y>-0.30)_lsJumpArmed=true;
+      const flick=_lsJumpArmed&&(y<-0.52)&&((dy<-0.18)||(y<-0.55));
+      if(flick&&_lsJumpCool<=0){
+        _lsJumpArmed=false;_lsJumpCool=0.28;
+        if(player.stance!=='stand'){setStance(player,'stand');player.jumpLock=true;}
+        else setk('Space',true);
+      }
+      if(y>0.48){
+        _lsDuckHeld=true;
+        if(player.stance==='stand')setStance(player,'crouch');
+      }else if(y<0.28&&_lsDuckHeld){
+        _lsDuckHeld=false;
+        if(player.stance==='crouch')setStance(player,'stand');
+      }
     }
-    if(leftStick.y<-0.65&&player&&player.alive&&!player.inTruck){
-      if(player.stance!=='stand'){setStance(player,'stand');player.jumpLock=true;}
-      else setk('Space',true);
-    }
+    _lsY=y;
+  }else{
+    if(_lsDuckHeld&&player&&player.alive&&!player.inTruck&&player.stance==='crouch')setStance(player,'stand');
+    _lsDuckHeld=false;_lsY=0;_lsJumpArmed=true;
   }
   if(TOUCH&&player&&!inMenuState()){
     const mob=isMobileUI();
@@ -4594,7 +4631,13 @@ function applyVirtualInput(){
         mouse.y=clamp(player.y-40+Math.sin(ang)*dist-cam.y,8,H-8);
       }else if(mob)applyDefaultRightAim();
       // hysteresis so a slightly-centered hold doesn't drop fire
-      if(mag>0.50||(_touchFiring&&mag>0.28)){mouse.down=true;_touchFiring=true;}
+      // rising edge + semi-auto pulse set mouse.clicked (tryFire requires it when !w.auto)
+      if(mag>0.50||(_touchFiring&&mag>0.28)){
+        mouse.down=true;
+        const w=WEAPONS[player.weapon];
+        if(!_touchFiring){mouse.clicked=true;_touchFiring=true;}
+        else if(w&&!w.auto&&!(player.reload>0)&&(player.cool||0)<=0)mouse.clicked=true;
+      }
       else if(mag<0.28){mouse.down=false;_touchFiring=false;}
     }else if(mob){
       applyDefaultRightAim();
@@ -4729,23 +4772,26 @@ function joyLayout(){
     };
   }
   const minG=joyPt(),btnR=Math.max(40,minG*0.55),stickR=Math.max(76,minG*0.95);
-  return {
-    L:{x:130,y:H-130,r:stickR},
-    R:{x:W-130,y:H-130,r:stickR},
-    btns:[
+  const wname=(player&&WEAPONS[player.weapon]&&WEAPONS[player.weapon].name)||'VAPEN';
+  const btns=[];
+  if(jumpBtnsOn()){
+    btns.push(
       {id:'jump',x:W-145,y:H-310,r:btnR,lab:'HOPPA',icon:'↑',big:true},
-      {id:'duck',x:W-300,y:H-310,r:btnR,lab:'DUCKA',icon:'↓',big:true},
-      {id:'grenade',x:W-300,y:H-200,r:btnR*0.92,lab:'GRANAT',big:true},
-      {id:'weapon',x:W-430,y:H-130,r:btnR*0.8,lab:'VAPEN'},
-      {id:'reload',x:W-445,y:H-230,r:btnR*1.05,lab:'LADDA',big:true},
-      {id:'use',x:80,y:H-280,r:btnR,lab:'E',sub:'PLOCKA',big:true},
-      {id:'pick',x:210,y:H-280,r:btnR*0.8,lab:'F'},
-      {id:'smoke',x:210,y:H-200,r:btnR*0.8,lab:'RÖK'},
-      {id:'pause',x:W-58,y:54,r:Math.max(28,minG*0.4),lab:'PAUS'}
-    ]
-  };
+      {id:'duck',x:W-300,y:H-310,r:btnR,lab:'DUCKA',icon:'↓',big:true}
+    );
+  }
+  btns.push(
+    {id:'grenade',x:W-300,y:H-200,r:btnR*0.92,lab:'GRANAT',big:true},
+    {id:'weapon',x:W-430,y:H-130,r:btnR*0.95,lab:'BYT VAPEN',sub:wname,big:true},
+    {id:'reload',x:W-445,y:H-230,r:btnR*1.05,lab:'LADDA',big:true},
+    {id:'use',x:80,y:H-280,r:btnR,lab:'E',sub:'PLOCKA',big:true},
+    {id:'pick',x:210,y:H-280,r:btnR*0.8,lab:'F'},
+    {id:'smoke',x:210,y:H-200,r:btnR*0.8,lab:'RÖK'},
+    {id:'pause',x:W-58,y:54,r:Math.max(28,minG*0.4),lab:'PAUS'}
+  );
+  return {L:{x:130,y:H-130,r:stickR},R:{x:W-130,y:H-130,r:stickR},btns};
 }
-const GAME_VERSION='v16';
+const GAME_VERSION='v17';
 let _ignoreMouseUntil=0;
 function suppressGhostMouse(){_ignoreMouseUntil=performance.now()+700;}
 function inMenuState(){
@@ -4788,7 +4834,7 @@ function tapButton(id){
   else if(id==='weapon'){const i=WKEYS.indexOf(player.weapon);setWeapon(WKEYS[(i+1)%WKEYS.length]);}
   else if(id==='grenade'){
     const gk=WKEYS.find(k=>WEAPONS[k]&&WEAPONS[k].grenade);
-    if(gk){setWeapon(gk);mouse.clicked=true;mouse.down=true;setTimeout(()=>{mouse.down=false;},80);}
+    if(gk){setWeapon(gk);mouse.clicked=true;mouse.down=true;setTimeout(()=>{if(!(rightStick&&rightStick.active&&_touchFiring))mouse.down=false;},80);}
   }
   else if(id==='use'){if(player.inTruck)exitTruck();else if(nearTruck())enterTruck();else if(typeof tryPickup==='function')tryPickup();}
   else if(id==='pick'&&typeof tryPickup==='function')tryPickup();
@@ -4913,9 +4959,27 @@ function drawInputOverlays(){
     ctx.fillStyle='rgba(0,0,0,0.32)';ctx.beginPath();ctx.arc(base.x,base.y,base.r,0,7);ctx.fill();
     ctx.strokeStyle='rgba(230,220,200,0.45)';ctx.lineWidth=2.5;ctx.stroke();
     if(hint){
-      ctx.fillStyle='rgba(230,220,200,0.35)';ctx.font='bold 11px monospace';ctx.textAlign='center';
-      ctx.fillText('↑ hoppa',base.x,base.y-base.r+16);
-      ctx.fillText('↓ ducka',base.x,base.y+base.r-8);
+      const pulse=0.62+0.38*Math.sin(((state&&state.time)||0)*3.4);
+      const col='rgba(230,210,140,'+pulse+')';
+      const chev=(cx,cy,dir,s)=>{
+        ctx.beginPath();
+        ctx.moveTo(cx, cy+dir*s);
+        ctx.lineTo(cx-s*0.85, cy-dir*s*0.15);
+        ctx.lineTo(cx-s*0.32, cy-dir*s*0.15);
+        ctx.lineTo(cx-s*0.32, cy-dir*s*0.7);
+        ctx.lineTo(cx+s*0.32, cy-dir*s*0.7);
+        ctx.lineTo(cx+s*0.32, cy-dir*s*0.15);
+        ctx.lineTo(cx+s*0.85, cy-dir*s*0.15);
+        ctx.closePath();ctx.fill();
+      };
+      ctx.save();ctx.fillStyle=col;ctx.textAlign='center';
+      chev(base.x, base.y-base.r*0.62, -1, 16);
+      ctx.font='900 12px monospace';ctx.fillStyle='rgba(240,230,200,'+(0.75+0.2*pulse)+')';
+      ctx.fillText('HOPPA',base.x,base.y-base.r*0.62+22);
+      ctx.fillText('DUCKA',base.x,base.y+base.r*0.42-8);
+      ctx.fillStyle=col;
+      chev(base.x, base.y+base.r*0.62, 1, 16);
+      ctx.restore();
     }
     // idle aim stick shows a facing nub to the right
     const idleX=(!S.active&&hint===false&&mob)?0.55:0;
@@ -5030,34 +5094,49 @@ if(typeof fireRWS==='function'){
 
 
 function tutOkBtn(){return {x:W/2-140,y:H/2+168,w:280,h:58,lab:'FÖRSTÅTT',primary:true};}
+function tutJumpBtn(){return {x:W/2-220,y:H/2+98,w:440,h:48,lab:jumpBtnsLabel()};}
+function tutLines(){
+  const lines=[
+    'Vänster spak: gå',
+    'Tryck spaken UPP för att hoppa',
+    'Håll spaken NER för att ducka',
+    'Höger spak: sikta och skjut (håll utåt)',
+    'Vapnet pekar höger när du inte siktar',
+    'BYT VAPEN  —  växla vapen',
+    'GRANAT, LADDA, E PLOCKA, PAUS'
+  ];
+  if(jumpBtnsOn())lines.push('Valfria knappar: HOPPA / DUCKA (kan slås av här)');
+  return lines;
+}
 function drawTutorial(){
   if(!TUT_ON)return;
   TUT_T=(TUT_T||0)+DT;
   ctx.fillStyle='rgba(0,0,0,0.72)';ctx.fillRect(0,0,W,H);
-  ctx.fillStyle='rgba(12,12,10,0.94)';ctx.fillRect(W/2-320,H/2-230,640,460);
-  ctx.strokeStyle='#b89b6a';ctx.lineWidth=2;ctx.strokeRect(W/2-320,H/2-230,640,460);
+  ctx.fillStyle='rgba(12,12,10,0.94)';ctx.fillRect(W/2-320,H/2-240,640,490);
+  ctx.strokeStyle='#b89b6a';ctx.lineWidth=2;ctx.strokeRect(W/2-320,H/2-240,640,490);
   ctx.textAlign='center';ctx.font='900 34px Impact, "Arial Black", sans-serif';ctx.fillStyle='#e6dccb';
-  ctx.fillText('STYRNING',W/2,H/2-180);
-  const lines=[
-    'Vänster spak: gå',
-    'Höger spak: sikta och skjut (håll utåt)',
-    'Vapnet pekar höger när du inte siktar',
-    'HOPPA  —  hoppa / res dig',
-    'DUCKA  —  knä / stå',
-    'GRANAT  —  kasta granat',
-    'E PLOCKA  —  plocka upp / fordon',
-    'PAUS  —  pausmenyn (uppe till höger)'
-  ];
+  ctx.fillText('STYRNING',W/2,H/2-190);
+  const lines=tutLines();
   ctx.font='bold 18px monospace';ctx.fillStyle='#d6cdbd';ctx.textAlign='left';
-  let y=H/2-130;
-  for(const s of lines){ctx.fillText('•  '+s,W/2-280,y);y+=32;}
+  let y=H/2-145;
+  for(const s of lines){ctx.fillText('•  '+s,W/2-280,y);y+=30;}
+  const jb=tutJumpBtn(),jhot=typeof hitRect==='function'&&hitRect(mouse.x,mouse.y,jb);
+  if(typeof drawMenuButton==='function')drawMenuButton(jb,jhot);
   const b=tutOkBtn(),hot=typeof hitRect==='function'&&hitRect(mouse.x,mouse.y,b);
   if(typeof drawMenuButton==='function')drawMenuButton(b,hot);
   ctx.textAlign='left';
 }
 function handleTutorialClick(){
   if(!TUT_ON)return false;
-  if(TUT_T>0.25)dismissTutorial();
+  if(TUT_T>0.25){
+    const jb=tutJumpBtn();
+    if(typeof hitRect==='function'&&hitRect(mouse.x,mouse.y,jb)){
+      setJumpBtns(!jumpBtnsOn(),true);
+      mouse.clicked=false;mouse.rclicked=false;
+      return true;
+    }
+    dismissTutorial();
+  }
   mouse.clicked=false;mouse.rclicked=false;
   return true;
 }
@@ -6720,7 +6799,7 @@ function drawHUD(){
 let last=performance.now(),acc=0;
 function frame(now){const raw=Math.min(0.1,(now-last)/1000);last=now;if(typeof tickTimeScale==='function')tickTimeScale(raw);const sc=typeof gameScale==='function'?gameScale():(state&&state.slow>0?0.3:1);acc+=raw*sc;let n=0;while(acc>=DT&&n<4){update(DT);acc-=DT;n++;}if(n===4)acc=0;render();requestAnimationFrame(frame);}
 resetGame(true);
-window.__game={get GAME_VERSION(){return typeof GAME_VERSION!=='undefined'?GAME_VERSION:'v16'},cssToCanvas,get state(){return state},get player(){return player},get truck(){return truck},get enemies(){return enemies},get ragdolls(){return ragdolls},get particles(){return particles},
+window.__game={get GAME_VERSION(){return typeof GAME_VERSION!=='undefined'?GAME_VERSION:'v17'},cssToCanvas,get state(){return state},get player(){return player},get truck(){return truck},get enemies(){return enemies},get ragdolls(){return ragdolls},get particles(){return particles},
   keys,mouse,update,render,pose,makeBomber,bomberBoom,get boss(){return state.boss},startBoss,destroyTech,damageTech,ARENA,launchDrone,SFX,setStance,enterTruck,exitTruck,explode,hitChar,onKey,get cam(){return cam},isSolid,groundY,get crates(){return crates},get walls(){return walls},bloodCov,
   startMode,isWilmer,isTed,get squad(){return squad},get eVehs(){return eVehs},get smokes(){return smokes},launchSmoke,fireRWS,completeMission,makePatria,resetGame,get GAME_MODE(){return GAME_MODE},drawWeaponLineupSheet,drawGunLocal,drawGunIcon,gunVisual,get drops(){return drops},get ammoCrates(){return ammoCrates},makeSniper,makeShield,makeGrenadier,tryPickup,applyLoadout,confirmLoadout,openLoadout,openWilmerSplash,openMeridianSplash,openModeSplash,drawModeSplash,triggerSlowmo,gameScale,noteKill,shouldSkipLoadout,get btEnabled(){return btEnabled},set btEnabled(v){btEnabled=!!v},laserClip,shieldBlock,
   startMission,openMissionSelect,openScoreScreen,computeScore,resetProgress,loadProgress,get CURRENT_MISSION(){return CURRENT_MISSION},set CURRENT_MISSION(v){CURRENT_MISSION=v},get lastScore(){return lastScore},get nvgOn(){return nvgOn},set nvgOn(v){nvgOn=!!v},get QUALITY(){return QUALITY},set QUALITY(v){QUALITY=v},get INPUT_MODE(){return INPUT_MODE},set INPUT_MODE(v){INPUT_MODE=v},get civilians(){return civilians},get rangeTargets(){return rangeTargets},get eDrones(){return eDrones},get convoy(){return convoy},throwFlare,togglePause,rumble,get lastPad(){return lastPad},MDEFS,get tedUnit(){return tedUnit},unitReveal,unitCrawl,unitPressKill,drawTedArt,get tedArtReady(){return typeof tedArtReady!=='undefined'&&tedArtReady},get vhsOn(){return vhsOn},set vhsOn(v){vhsOn=!!v},get tedPress(){return tedPress},get tedTanker(){return tedTanker},get tedPolice(){return tedPolice},get fxDebris(){return fxDebris},get envProps(){return envProps},addChunk,debrisBurst,wakeChunks,chunksMaxSpeed,gatherLights,get lightN(){return lightN},initFxWorld,isNight,duskAmt,addLight,scareBirds};
@@ -6835,5 +6914,22 @@ if(typeof drawHUD==='function'){
     ctx.fillText(rel?( (typeof isWilmer==='function'&&isWilmer())?'LADDAR…':'RELOADING…'):( (typeof isWilmer==='function'&&isWilmer())?'TOMT — LADDA':'EMPTY — RELOAD'),W/2,y);
     ctx.restore();
   };
+}
+/* ---------------- pass 17: fire after weapon swap, stick jump/crouch, BYT VAPEN ---------------- */
+if(window.__game){
+  const G=window.__game;
+  G.setWeapon=typeof setWeapon==='function'?setWeapon:G.setWeapon;
+  G.tapButton=typeof tapButton==='function'?tapButton:G.tapButton;
+  G.tryFire=typeof tryFire==='function'?tryFire:G.tryFire;
+  G.startReload=typeof startReload==='function'?startReload:G.startReload;
+  G.jumpBtnsOn=typeof jumpBtnsOn==='function'?jumpBtnsOn:undefined;
+  G.setJumpBtns=typeof setJumpBtns==='function'?setJumpBtns:undefined;
+  G.tutJumpBtn=typeof tutJumpBtn==='function'?tutJumpBtn:undefined;
+  G.tutLines=typeof tutLines==='function'?tutLines:undefined;
+  G.tutOkBtn=typeof tutOkBtn==='function'?tutOkBtn:undefined;
+  G.addDrop=typeof addDrop==='function'?addDrop:G.addDrop;
+  G.applyLoadout=typeof applyLoadout==='function'?applyLoadout:G.applyLoadout;
+  G.WKEYS=function(){return WKEYS;};
+  Object.defineProperty(G,'WKEYS_NOW',{get:()=>WKEYS});
 }
 </script></body></html>
